@@ -280,6 +280,23 @@ export default function ScriptEditor({ tabs, onClose }: Props) {
                         placeholder="Timeout ms"
                         style={{ width: 120 }}
                       />
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-dim)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={!!step.requireApproval}
+                          onChange={e => setStep(i, { requireApproval: e.target.checked })}
+                          style={{ width: 'auto', margin: 0 }}
+                        />
+                        Require approval before this step
+                      </label>
+                      {step.requireApproval && (
+                        <input
+                          value={step.approvalPrompt ?? ''}
+                          onChange={e => setStep(i, { approvalPrompt: e.target.value || undefined })}
+                          placeholder="Approval message (sent to webhook)"
+                          style={{ fontSize: 11 }}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}

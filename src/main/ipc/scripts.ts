@@ -50,8 +50,8 @@ async function writeToConnection(connId: string, connType: string, data: string)
   const channel = connType === 'ssh'    ? IPC.SSH_WRITE
                 : connType === 'serial' ? IPC.SERIAL_WRITE
                 : IPC.TELNET_WRITE
-  // Dispatch through ipcMain directly (avoids round-trip through renderer)
-  await ipcMain.listeners(channel)?.[0]?.(null as any, connId, data)
+  // Dispatch through ipcMain — same pattern as broadcast.ts
+  ipcMain.emit(channel, { sender: { isDestroyed: () => false } } as any, connId, data)
 }
 
 function waitForExpect(connId: string, pattern: RegExp, timeoutMs: number): Promise<string> {

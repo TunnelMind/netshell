@@ -1,6 +1,6 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerZIP } from '@electron-forge/maker-zip';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
@@ -13,14 +13,42 @@ import { rendererConfig } from './webpack.renderer.config';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      // Native modules must be unpacked from the asar archive to load correctly.
+      // Covers: .node (all platforms), .dll (Windows), .dylib (macOS), .so (Linux)
+      unpack: '**/*.{node,dll,dylib,so}',
+    },
+    appId: 'com.netshell.app',
+    executableName: 'netshell',
+    // Extra files placed outside the asar archive in the app's resources dir.
+    // gnmi.proto must be accessible at runtime for @grpc/proto-loader.
+    extraResource: ['src/main/gnmi.proto'],
+    // icon: './assets/icon', // electron-packager will auto-detect .ico/.icns/.png by platform
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    // Windows — Squirrel produces a "NetShell Setup.exe" NSIS-style installer
+    new MakerSquirrel({
+      name: 'netshell',
+      setupExe: 'NetShell-Setup.exe',
+    }),
+    // macOS — .dmg disk image (conventional Mac distribution format)
+    new MakerDMG({
+      format: 'ULFO',
+    }, ['darwin']),
+    // Linux — .deb for Debian/Ubuntu, .rpm for Fedora/RHEL
+    new MakerDeb({
+      options: {
+        maintainer: 'NetShell',
+        homepage: 'https://github.com/netshell/netshell',
+        depends: ['libsecret-1-0'],  // required by keytar
+      },
+    }),
+    new MakerRpm({
+      options: {
+        requires: ['libsecret'],     // required by keytar
+      },
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),

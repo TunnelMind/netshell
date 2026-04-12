@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import type { Session } from '../types'
 
 const TYPE_ICON: Record<string, string> = {
-  ssh: '⌨', telnet: '⌨', serial: '⊞', meraki: '⬡',
+  ssh: '⌨', telnet: '⌨', serial: '⊞', meraki: '⬡', gnmi: '◈', k8s: '⎈', ssm: '☁',
 }
 
 interface Props {
@@ -19,9 +19,16 @@ interface Props {
   onAudit: () => void
   onDiff: () => void
   onTftp: () => void
+  // Phase 8 — new panel triggers
+  onAI?: () => void
+  onTopology?: () => void
+  onGitops?: () => void
+  onCompliance?: () => void
+  onTemplates?: () => void
+  onNormalize?: () => void
 }
 
-export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDelete, onManageCreds, onImport, onScripts, onSettings, onSnippets, onAudit, onDiff, onTftp }: Props) {
+export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDelete, onManageCreds, onImport, onScripts, onSettings, onSnippets, onAudit, onDiff, onTftp, onAI, onTopology, onGitops, onCompliance, onTemplates, onNormalize }: Props) {
   const [query, setQuery] = useState('')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [ctxMenu, setCtxMenu] = useState<{ x: number, y: number, session: Session } | null>(null)
@@ -206,6 +213,21 @@ export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDele
           <FooterBtn onClick={onAudit}>Audit Log</FooterBtn>
           <FooterBtn onClick={onSettings}>Settings</FooterBtn>
         </div>
+        {(onAI || onTopology || onGitops || onCompliance || onTemplates || onNormalize) && (
+          <>
+            <div style={{ height: 1, background: 'var(--border)', margin: '2px 0' }} />
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {onAI       && <FooterBtn onClick={onAI}>AI</FooterBtn>}
+              {onTopology && <FooterBtn onClick={onTopology}>Topology</FooterBtn>}
+              {onGitops   && <FooterBtn onClick={onGitops}>GitOps</FooterBtn>}
+            </div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {onCompliance && <FooterBtn onClick={onCompliance}>Compliance</FooterBtn>}
+              {onTemplates  && <FooterBtn onClick={onTemplates}>Templates</FooterBtn>}
+              {onNormalize  && <FooterBtn onClick={onNormalize}>Normalize</FooterBtn>}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Context menu */}

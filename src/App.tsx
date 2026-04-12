@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import SessionSidebar from './components/SessionSidebar'
 import TabBar from './components/TabBar'
 import TerminalTab from './components/TerminalTab'
@@ -13,6 +13,13 @@ import TftpServer from './components/TftpServer'
 import Settings from './components/Settings'
 import SnippetManager from './components/SnippetManager'
 import AuditLog from './components/AuditLog'
+import AIAssistant from './components/AIAssistant'
+import GitopsPanel from './components/GitopsPanel'
+import ComplianceScanner from './components/ComplianceScanner'
+import TemplateEditor from './components/TemplateEditor'
+import TopologyMap from './components/TopologyMap'
+import NormalizeView from './components/NormalizeView'
+import LicenseGate from './components/LicenseGate'
 import type { Session, CredentialMeta, OpenTab, Snippet, BroadcastTarget } from './types'
 
 export default function App() {
@@ -33,6 +40,14 @@ export default function App() {
   const [showAudit,      setShowAudit]      = useState(false)
   const [showDiff,       setShowDiff]       = useState(false)
   const [showTftp,       setShowTftp]       = useState(false)
+  // Phase 8 modals
+  const [showAI,         setShowAI]         = useState(false)
+  const [showGitops,     setShowGitops]     = useState(false)
+  const [showCompliance, setShowCompliance] = useState(false)
+  const [showTemplates,  setShowTemplates]  = useState(false)
+  const [showTopology,   setShowTopology]   = useState(false)
+  const [showNormalize,  setShowNormalize]  = useState(false)
+  const terminalContextRef = useRef<string>('')
 
   const loadData = useCallback(async () => {
     const [s, c, sn] = await Promise.all([
@@ -47,12 +62,16 @@ export default function App() {
 
   useEffect(() => { loadData() }, [loadData])
 
-  // Ctrl+Space → snippet picker
+  // Ctrl+Space → snippet picker; Ctrl+Alt+A → AI assistant
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault()
         setShowSnippets(v => !v)
+      }
+      if (e.ctrlKey && e.altKey && e.code === 'KeyA') {
+        e.preventDefault()
+        setShowAI(v => !v)
       }
     }
     window.addEventListener('keydown', handler)
@@ -67,6 +86,7 @@ export default function App() {
       id: tabId, sessionId: session.id,
       sessionName: session.name, sessionType: session.type,
       status: 'connecting', title: session.name,
+      detectedVendor: session.detectedVendor,
     }])
     setActiveTabId(tabId)
   }, [tabs])
@@ -128,6 +148,7 @@ export default function App() {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null
 
   return (
+    <LicenseGate>
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <SessionSidebar
         sessions={sessions}
@@ -143,6 +164,12 @@ export default function App() {
         onAudit={() => setShowAudit(true)}
         onDiff={() => setShowDiff(true)}
         onTftp={() => setShowTftp(true)}
+        onAI={() => setShowAI(v => !v)}
+        onTopology={() => setShowTopology(true)}
+        onGitops={() => setShowGitops(true)}
+        onCompliance={() => setShowCompliance(true)}
+        onTemplates={() => setShowTemplates(true)}
+        onNormalize={() => setShowNormalize(true)}
       />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
@@ -244,6 +271,48 @@ export default function App() {
       {showTftp && (
         <TftpServer onClose={() => setShowTftp(false)} />
       )}
+
+      {/* Phase 8 modals */}
+      {showAI && (
+        <AIAssistant
+          activeTab={activeTab ?? undefined}
+          terminalContext={terminalContextRef.current}
+          onSendToTerminal={text => { if (activeTab?.connId) { sendSnippet(text) } }}
+          onClose={() => setShowAI(false)}
+        />
+      )}
+      {showGitops && (
+        <GitopsPanel
+          activeTab={activeTab ?? undefined}
+          onClose={() => setShowGitops(false)}
+        />
+      )}
+      {showCompliance && (
+        <ComplianceScanner
+          activeTab={activeTab ?? undefined}
+          onClose={() => setShowCompliance(false)}
+        />
+      )}
+      {showTemplates && (
+        <TemplateEditor
+          onSendToTerminal={text => { if (activeTab?.connId) { sendSnippet(text) } }}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
+      {showTopology && (
+        <TopologyMap
+          tabs={tabs}
+          onFocusTab={tabId => { setActiveTabId(tabId); setShowTopology(false) }}
+          onClose={() => setShowTopology(false)}
+        />
+      )}
+      {showNormalize && (
+        <NormalizeView
+          activeTab={activeTab ?? undefined}
+          onClose={() => setShowNormalize(false)}
+        />
+      )}
     </div>
+    </LicenseGate>
   )
 }

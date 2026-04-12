@@ -1,5 +1,5 @@
 node_modules/
 out/
 .webpack/
-dist/
 *.log
+netshell-license.json

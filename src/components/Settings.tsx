@@ -204,6 +204,95 @@ export default function Settings({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
+        {/* AI Assistant */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+        {sectionLabel('AI Assistant (Local Ollama)')}
+
+        {row('Ollama URL', (
+          <input
+            value={settings.ollamaUrl ?? 'http://localhost:11434'}
+            onChange={e => set('ollamaUrl', e.target.value)}
+            placeholder="http://localhost:11434"
+          />
+        ))}
+
+        {row('Model', (
+          <input
+            value={settings.ollamaModel ?? 'llama3.2'}
+            onChange={e => set('ollamaModel', e.target.value)}
+            placeholder="llama3.2"
+          />
+        ))}
+
+        {row('Enable AI', (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'auto' }}>
+            <input type="checkbox" checked={!!settings.aiEnabled} onChange={e => set('aiEnabled', e.target.checked)} style={{ width: 'auto' }} />
+            <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>Enable AI command assistant</span>
+          </label>
+        ))}
+
+        {/* Session Recording */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+        {sectionLabel('Session Recording')}
+
+        {row('Enable Recording', (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'auto' }}>
+            <input type="checkbox" checked={!!settings.recordingEnabled} onChange={e => set('recordingEnabled', e.target.checked)} style={{ width: 'auto' }} />
+            <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>Auto-record sessions (Ed25519 signed)</span>
+          </label>
+        ))}
+
+        {row('Recording Dir', (
+          <input
+            value={settings.recordingDir ?? ''}
+            onChange={e => set('recordingDir', e.target.value)}
+            placeholder="Leave blank for default (AppData/netshell/recordings)"
+          />
+        ))}
+
+        {/* Post-Quantum SSH */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+        {sectionLabel('Post-Quantum SSH')}
+
+        {row('PQ Kex', (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'auto' }}>
+            <input type="checkbox" checked={!!settings.pqSshEnabled} onChange={e => set('pqSshEnabled', e.target.checked)} style={{ width: 'auto' }} />
+            <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>Prefer ML-KEM-768/X25519 hybrid kex (server must support)</span>
+          </label>
+        ))}
+
+        {/* Approvals */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+        {sectionLabel('Approval Webhooks (JIT / Runbook)')}
+
+        {row('Webhook URL', (
+          <input
+            value={settings.approvalWebhookUrl ?? ''}
+            onChange={e => set('approvalWebhookUrl', e.target.value)}
+            placeholder="https://hooks.slack.com/services/... or Teams URL"
+          />
+        ))}
+
+        {/* GitOps */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
+        {sectionLabel('GitOps / Drift Detection')}
+
+        {row('Git Repo Path', (
+          <input
+            value={settings.gitRepoPath ?? ''}
+            onChange={e => set('gitRepoPath', e.target.value)}
+            placeholder="/home/user/network-configs"
+          />
+        ))}
+
+        {row('Branch', (
+          <input
+            value={settings.gitBranch ?? 'main'}
+            onChange={e => set('gitBranch', e.target.value)}
+            placeholder="main"
+          />
+        ))}
+
         {/* Footer */}
         <div style={{ height: 1, background: 'var(--border)', margin: '16px 0' }} />
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

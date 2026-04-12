@@ -1,0 +1,118 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'           # triggers on v1.0.0, v1.2.3, etc.
+  workflow_dispatch:   # allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact_glob: 'out/make/**/*.exe'
+          - os: macos-latest
+            platform: macos
+            artifact_glob: 'out/make/**/*.dmg'
+          - os: ubuntu-latest
+            platform: linux
+            artifact_glob: 'out/make/**/*.{deb,rpm}'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Linux: install native deps for keytar and serialport
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev libudev-dev rpm
+
+      # macOS: install dmg-canvas (optional, improves DMG appearance)
+      - name: Install macOS tools
+        if: matrix.platform == 'macos'
+        run: brew install python-setuptools || true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and make installers
+        run: npm run make
+        env:
+          # Disable code signing by default — set these secrets to enable
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CI: true
+
+      # Upload each platform's installer as a workflow artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetShell-${{ matrix.platform }}
+          path: out/make/**
+          if-no-files-found: error
+
+  # Create a GitHub Release and attach all three installers
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')   # only on tag pushes
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: NetShell ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}   # v1.0.0-beta → prerelease
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.dmg
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+          body: |
+            ## NetShell ${{ github.ref_name }}
+
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | Windows  | `NetShell-Setup.exe` |
+            | macOS    | `NetShell-*.dmg` |
+            | Linux (Debian/Ubuntu) | `netshell_*.deb` |
+            | Linux (Fedora/RHEL)   | `netshell-*.rpm` |
+
+            ### Linux install
+            ```bash
+            # Debian/Ubuntu
+            sudo dpkg -i netshell_*.deb
+
+            # Fedora/RHEL
+            sudo rpm -i netshell-*.rpm
+            ```
+
+            ### macOS note
+            If Gatekeeper blocks the app: right-click → Open → Open.
+            For fully signed/notarized builds, set APPLE_ID, APPLE_ID_PASSWORD,
+            and APPLE_TEAM_ID secrets in this repository.

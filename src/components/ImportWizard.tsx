@@ -6,42 +6,51 @@ interface Props {
   onClose: () => void
 }
 
-type Tab = 'putty' | 'ssh'
+type Tab = 'putty' | 'ssh' | 'terraform' | 'ansible'
 
 export default function ImportWizard({ onImport, onClose }: Props) {
   const [tab, setTab] = useState<Tab>('ssh')
   const [loading, setLoading] = useState(false)
   const [sshConfigPath, setSshConfigPath] = useState('~/.ssh/config')
+  const [terraformPath, setTerraformPath] = useState('')
+  const [ansiblePath, setAnsiblePath]     = useState('')
   const [preview, setPreview] = useState<Partial<Session>[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [error, setError] = useState('')
 
+  const loadSessions = async (sessions: Partial<Session>[]) => {
+    setPreview(sessions)
+    setSelected(new Set(sessions.map(s => s.id!).filter(Boolean)))
+  }
+
   const loadPuTTY = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const sessions = await window.api.import.putty()
-      setPreview(sessions)
-      setSelected(new Set(sessions.map(s => s.id!).filter(Boolean)))
-    } catch (e: unknown) {
-      setError((e as Error).message)
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true); setError('')
+    try { await loadSessions(await window.api.import.putty()) }
+    catch (e: unknown) { setError((e as Error).message) }
+    finally { setLoading(false) }
   }
 
   const loadSSHConfig = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const sessions = await window.api.import.sshConfig(sshConfigPath.startsWith('~') ? undefined : sshConfigPath)
-      setPreview(sessions)
-      setSelected(new Set(sessions.map(s => s.id!).filter(Boolean)))
-    } catch (e: unknown) {
-      setError((e as Error).message)
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true); setError('')
+    try { await loadSessions(await window.api.import.sshConfig(sshConfigPath.startsWith('~') ? undefined : sshConfigPath)) }
+    catch (e: unknown) { setError((e as Error).message) }
+    finally { setLoading(false) }
+  }
+
+  const loadTerraform = async () => {
+    if (!terraformPath) { setError('Enter the path to your terraform.tfstate file.'); return }
+    setLoading(true); setError('')
+    try { await loadSessions(await (window.api.import as any).terraform(terraformPath)) }
+    catch (e: unknown) { setError((e as Error).message) }
+    finally { setLoading(false) }
+  }
+
+  const loadAnsible = async () => {
+    if (!ansiblePath) { setError('Enter the path to your Ansible inventory YAML file.'); return }
+    setLoading(true); setError('')
+    try { await loadSessions(await (window.api.import as any).ansible(ansiblePath)) }
+    catch (e: unknown) { setError((e as Error).message) }
+    finally { setLoading(false) }
   }
 
   const toggleAll = () => {
@@ -64,6 +73,8 @@ export default function ImportWizard({ onImport, onClose }: Props) {
     const toImport = preview.filter(s => s.id && selected.has(s.id))
     onImport(toImport)
   }
+
+  const switchTab = (t: Tab) => { setTab(t); setPreview([]); setError('') }
 
   const tabStyle = (t: Tab) => ({
     padding: '6px 16px',
@@ -90,32 +101,18 @@ export default function ImportWizard({ onImport, onClose }: Props) {
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-bright)' }}>Import Sessions</div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button style={tabStyle('ssh')} onClick={() => { setTab('ssh'); setPreview([]); setError('') }}>
-            SSH Config (~/.ssh/config)
-          </button>
-          <button style={tabStyle('putty')} onClick={() => { setTab('putty'); setPreview([]); setError('') }}>
-            PuTTY (Windows)
-          </button>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button style={tabStyle('ssh')} onClick={() => switchTab('ssh')}>SSH Config</button>
+          <button style={tabStyle('putty')} onClick={() => switchTab('putty')}>PuTTY (Windows)</button>
+          <button style={tabStyle('terraform')} onClick={() => switchTab('terraform')}>Terraform State</button>
+          <button style={tabStyle('ansible')} onClick={() => switchTab('ansible')}>Ansible Inventory</button>
         </div>
 
         {/* Tab content */}
         {tab === 'ssh' && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input
-              value={sshConfigPath}
-              onChange={e => setSshConfigPath(e.target.value)}
-              placeholder="~/.ssh/config"
-              style={{ flex: 1 }}
-            />
-            <button
-              onClick={loadSSHConfig}
-              disabled={loading}
-              style={{
-                background: 'var(--accent-dim)', border: '1px solid var(--accent)',
-                color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0,
-              }}
-            >
+            <input value={sshConfigPath} onChange={e => setSshConfigPath(e.target.value)} placeholder="~/.ssh/config" style={{ flex: 1 }} />
+            <button onClick={loadSSHConfig} disabled={loading} style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0 }}>
               {loading ? 'Loading…' : 'Load'}
             </button>
           </div>
@@ -123,18 +120,27 @@ export default function ImportWizard({ onImport, onClose }: Props) {
 
         {tab === 'putty' && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ flex: 1, fontSize: 12, color: 'var(--text-dim)' }}>
-              Reads HKCU\Software\SimonTatham\PuTTY\Sessions (Windows only)
-            </div>
-            <button
-              onClick={loadPuTTY}
-              disabled={loading}
-              style={{
-                background: 'var(--accent-dim)', border: '1px solid var(--accent)',
-                color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0,
-              }}
-            >
+            <div style={{ flex: 1, fontSize: 12, color: 'var(--text-dim)' }}>Reads HKCU\Software\SimonTatham\PuTTY\Sessions (Windows only)</div>
+            <button onClick={loadPuTTY} disabled={loading} style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0 }}>
               {loading ? 'Scanning…' : 'Scan Registry'}
+            </button>
+          </div>
+        )}
+
+        {tab === 'terraform' && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input value={terraformPath} onChange={e => setTerraformPath(e.target.value)} placeholder="/path/to/terraform.tfstate" style={{ flex: 1 }} />
+            <button onClick={loadTerraform} disabled={loading} style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0 }}>
+              {loading ? 'Loading…' : 'Load State'}
+            </button>
+          </div>
+        )}
+
+        {tab === 'ansible' && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input value={ansiblePath} onChange={e => setAnsiblePath(e.target.value)} placeholder="/path/to/inventory.yml" style={{ flex: 1 }} />
+            <button onClick={loadAnsible} disabled={loading} style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent)', color: 'var(--accent)', borderRadius: 4, padding: '6px 16px', flexShrink: 0 }}>
+              {loading ? 'Loading…' : 'Load Inventory'}
             </button>
           </div>
         )}
@@ -198,7 +204,10 @@ export default function ImportWizard({ onImport, onClose }: Props) {
 
         {preview.length === 0 && !loading && !error && (
           <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: 12, padding: 24 }}>
-            {tab === 'ssh' ? 'Click Load to parse your SSH config file.' : 'Click Scan Registry to find PuTTY sessions.'}
+            {tab === 'ssh' ? 'Click Load to parse your SSH config file.'
+            : tab === 'putty' ? 'Click Scan Registry to find PuTTY sessions.'
+            : tab === 'terraform' ? 'Enter path to terraform.tfstate and click Load State.'
+            : 'Enter path to Ansible inventory YAML and click Load Inventory.'}
           </div>
         )}
 

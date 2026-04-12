@@ -28,8 +28,9 @@ export function registerSshHandlers(): void {
     privateKeyPath?: string
     rows: number
     cols: number
+    sshAlgorithms?: string[]
   }) => {
-    const { sessionId, host, port, credentialId, authType, privateKeyPath, rows, cols } = params
+    const { sessionId, host, port, credentialId, authType, privateKeyPath, rows, cols, sshAlgorithms } = params
     const connId = makeConnId(sessionId)
     const sender = event.sender
 
@@ -93,15 +94,21 @@ export function registerSshHandlers(): void {
         reject(err)
       })
 
-      client.connect({
-        host,
-        port,
-        username,
-        ...authConfig,
-        // Accept any host key for now — TODO: implement known_hosts check
+      const settings = load().settings
+      // Build kex algorithm list — prefer post-quantum hybrid if enabled
+      const kexAlgorithms: string[] | undefined = sshAlgorithms ?? (settings.pqSshEnabled
+        ? ['mlkem768x25519-sha256', 'ecdh-sha2-nistp256', 'ecdh-sha2-nistp384', 'diffie-hellman-group14-sha256']
+        : undefined)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const connectOptions: any = {
+        host, port, username, ...authConfig,
         hostVerifier: () => true,
         readyTimeout: 10000,
-      })
+      }
+      if (kexAlgorithms) connectOptions.algorithms = { kex: kexAlgorithms }
+
+      client.connect(connectOptions)
     })
   })
 

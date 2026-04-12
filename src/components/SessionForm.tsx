@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react'
 import type { Session, CredentialMeta, SessionType, AuthType } from '../types'
 import MerakiOrgPicker from './MerakiOrgPicker'
 
+// K8s context/pod lists loaded lazily when type === 'k8s'
+interface K8sContext { name: string; cluster: string; user: string; current: boolean }
+interface K8sPod { name: string; namespace: string; containers: string[] }
+
 const EMPTY: Omit<Session, 'id'> = {
   name: '',
   type: 'ssh',
@@ -32,10 +36,22 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
   }))
   const [serialPorts, setSerialPorts] = useState<{ path: string; manufacturer: string }[]>([])
   const [showOrgPicker, setShowOrgPicker] = useState(false)
+  const [k8sContexts, setK8sContexts] = useState<K8sContext[]>([])
+  const [k8sPods, setK8sPods]         = useState<K8sPod[]>([])
+  const [ssmInstances, setSsmInstances] = useState<{ instanceId: string; name: string }[]>([])
 
   useEffect(() => {
     window.api.serial.list().then(setSerialPorts).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (form.type === 'k8s') {
+      window.api.k8s.listContexts().then(setK8sContexts).catch(() => {})
+    }
+    if (form.type === 'ssm') {
+      window.api.ssm.listInstances({ region: form.ssmRegion, profile: form.ssmProfile }).then(setSsmInstances).catch(() => {})
+    }
+  }, [form.type])
 
   const set = <K extends keyof typeof form>(k: K, v: typeof form[K]) =>
     setForm(prev => ({ ...prev, [k]: v }))
@@ -46,9 +62,12 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
     onSave({ ...form, id: session?.id ?? '' } as Session)
   }
 
-  const isSSH = form.type === 'ssh' || form.type === 'telnet'
+  const isSSH    = form.type === 'ssh' || form.type === 'telnet'
   const isSerial = form.type === 'serial'
   const isMeraki = form.type === 'meraki'
+  const isGnmi   = form.type === 'gnmi'
+  const isK8s    = form.type === 'k8s'
+  const isSsm    = form.type === 'ssm'
 
   return (
     <>
@@ -69,6 +88,9 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
             <option value="telnet">Telnet</option>
             <option value="serial">Serial / Console</option>
             <option value="meraki">Meraki CLI</option>
+            <option value="gnmi">gNMI Telemetry</option>
+            <option value="k8s">Kubernetes Exec</option>
+            <option value="ssm">AWS SSM</option>
           </select>
         </Row>
 
@@ -209,6 +231,89 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
                 onChange={e => set('networkId', e.target.value)}
                 placeholder="Auto-filled when you browse"
               />
+            </Row>
+          </>
+        )}
+
+        {isGnmi && (
+          <>
+            <Row label="Host / IP">
+              <input value={form.host ?? ''} onChange={e => set('host', e.target.value)} placeholder="192.168.1.1" />
+            </Row>
+            <Row label="gNMI Port">
+              <input type="number" value={form.gnmiPort ?? 9339} onChange={e => set('gnmiPort', parseInt(e.target.value, 10))} style={{ width: 80 }} />
+            </Row>
+            <Row label="Insecure TLS">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'auto' }}>
+                <input type="checkbox" checked={!!form.gnmiInsecure} onChange={e => set('gnmiInsecure', e.target.checked)} style={{ width: 'auto' }} />
+                <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>Skip TLS verification</span>
+              </label>
+            </Row>
+            <Row label="Subscribe Paths">
+              <textarea
+                value={(form.gnmiPaths ?? []).join('\n')}
+                onChange={e => set('gnmiPaths', e.target.value.split('\n').filter(Boolean))}
+                rows={4}
+                placeholder="/interfaces/interface[name=*]/state&#10;/system/memory/state"
+                style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }}
+              />
+            </Row>
+          </>
+        )}
+
+        {isK8s && (
+          <>
+            <Row label="Context">
+              <select value={form.k8sContext ?? ''} onChange={e => {
+                set('k8sContext', e.target.value || undefined)
+                if (e.target.value) {
+                  window.api.k8s.listPods({ context: e.target.value, namespace: form.k8sNamespace ?? 'default' }).then(setK8sPods).catch(() => {})
+                }
+              }}>
+                <option value="">— default —</option>
+                {k8sContexts.map(c => <option key={c.name} value={c.name}>{c.name}{c.current ? ' (current)' : ''}</option>)}
+              </select>
+            </Row>
+            <Row label="Namespace">
+              <input value={form.k8sNamespace ?? 'default'} onChange={e => set('k8sNamespace', e.target.value)} placeholder="default" />
+            </Row>
+            <Row label="Pod">
+              {k8sPods.length > 0 ? (
+                <select value={form.k8sPod ?? ''} onChange={e => {
+                  set('k8sPod', e.target.value)
+                  const pod = k8sPods.find(p => p.name === e.target.value)
+                  if (pod?.containers.length === 1) set('k8sContainer', pod.containers[0])
+                }}>
+                  <option value="">— Select pod —</option>
+                  {k8sPods.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                </select>
+              ) : (
+                <input value={form.k8sPod ?? ''} onChange={e => set('k8sPod', e.target.value)} placeholder="my-pod-abc123" />
+              )}
+            </Row>
+            <Row label="Container">
+              <input value={form.k8sContainer ?? ''} onChange={e => set('k8sContainer', e.target.value)} placeholder="(first container if blank)" />
+            </Row>
+          </>
+        )}
+
+        {isSsm && (
+          <>
+            <Row label="AWS Region">
+              <input value={form.ssmRegion ?? ''} onChange={e => set('ssmRegion', e.target.value)} placeholder="us-east-1" />
+            </Row>
+            <Row label="AWS Profile">
+              <input value={form.ssmProfile ?? ''} onChange={e => set('ssmProfile', e.target.value)} placeholder="default" />
+            </Row>
+            <Row label="Instance ID">
+              {ssmInstances.length > 0 ? (
+                <select value={form.ssmInstanceId ?? ''} onChange={e => set('ssmInstanceId', e.target.value)}>
+                  <option value="">— Select instance —</option>
+                  {ssmInstances.map(i => <option key={i.instanceId} value={i.instanceId}>{i.name} ({i.instanceId})</option>)}
+                </select>
+              ) : (
+                <input value={form.ssmInstanceId ?? ''} onChange={e => set('ssmInstanceId', e.target.value)} placeholder="i-0abc1234567890def" />
+              )}
             </Row>
           </>
         )}

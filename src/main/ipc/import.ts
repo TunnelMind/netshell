@@ -106,6 +106,110 @@ function importSshConfig(filePath?: string): Partial<Session>[] {
   }
 }
 
+// Terraform state import — parses terraform.tfstate JSON
+function importTerraform(filePath: string): Partial<Session>[] {
+  const resolved = path.resolve(filePath)
+  if (!resolved.endsWith('.tfstate') && !resolved.endsWith('.json')) {
+    throw new Error('Expected a .tfstate or .json file')
+  }
+  try {
+    const raw = fs.readFileSync(resolved, 'utf8')
+    const state = JSON.parse(raw)
+    const sessions: Partial<Session>[] = []
+
+    const resources: any[] = state.resources ?? []
+    for (const resource of resources) {
+      // Handle aws_instance, google_compute_instance, azurerm_linux_virtual_machine, etc.
+      const instances: any[] = resource.instances ?? []
+      for (const inst of instances) {
+        const attrs = inst.attributes ?? {}
+        const ip = attrs.public_ip || attrs.private_ip || attrs.network_interface_ids?.[0] || attrs.ip_address
+        const name = attrs.tags?.Name || attrs.name || `${resource.type}.${resource.name}`
+        if (!ip) continue
+
+        sessions.push({
+          id: uuidv4(),
+          name,
+          type: 'ssh',
+          group: resource.type,
+          notes: `Terraform import — ${resource.type}.${resource.name}`,
+          connectionCount: 0,
+          host: ip,
+          port: 22,
+          authType: 'key',
+          logEnabled: false,
+        } as Partial<Session>)
+      }
+    }
+    return sessions
+  } catch (e) {
+    console.error('Terraform import error:', e)
+    return []
+  }
+}
+
+// Ansible inventory import — parses YAML inventory files
+function importAnsible(filePath: string): Partial<Session>[] {
+  const resolved = path.resolve(filePath)
+  if (!resolved.endsWith('.yml') && !resolved.endsWith('.yaml') && !resolved.endsWith('.json')) {
+    throw new Error('Expected a .yml, .yaml, or .json inventory file')
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const yaml = require('js-yaml')
+    const raw = fs.readFileSync(resolved, 'utf8')
+    const inv = yaml.load(raw) as Record<string, any>
+    if (!inv) return []
+
+    const sessions: Partial<Session>[] = []
+
+    function processGroup(groupName: string, group: any): void {
+      if (!group || typeof group !== 'object') return
+
+      // Process hosts in this group
+      const hosts = group.hosts ?? {}
+      for (const [hostname, hostvars] of Object.entries<any>(hosts ?? {})) {
+        const ip = hostvars?.ansible_host || hostvars?.ansible_ip || hostname
+        const port = parseInt(hostvars?.ansible_port ?? '22', 10)
+        const user = hostvars?.ansible_user
+
+        sessions.push({
+          id: uuidv4(),
+          name: hostname,
+          type: 'ssh',
+          group: groupName === 'all' ? '' : groupName,
+          notes: user ? `Ansible import — user: ${user}` : 'Ansible import',
+          connectionCount: 0,
+          host: ip,
+          port: isNaN(port) ? 22 : port,
+          authType: 'key',
+          logEnabled: false,
+        } as Partial<Session>)
+      }
+
+      // Recurse into children
+      const children = group.children ?? {}
+      for (const [childName, childGroup] of Object.entries<any>(children ?? {})) {
+        processGroup(childName, childGroup)
+      }
+    }
+
+    // Top-level key is typically "all"
+    if (inv.all) {
+      processGroup('all', inv.all)
+    } else {
+      for (const [groupName, group] of Object.entries<any>(inv)) {
+        processGroup(groupName, group)
+      }
+    }
+
+    return sessions
+  } catch (e) {
+    console.error('Ansible import error:', e)
+    return []
+  }
+}
+
 export function registerImportHandlers(): void {
   ipcMain.handle(IPC.IMPORT_PUTTY, async () => {
     return importPuTTY()
@@ -113,5 +217,13 @@ export function registerImportHandlers(): void {
 
   ipcMain.handle(IPC.IMPORT_SSH_CONFIG, async (_event, filePath?: string) => {
     return importSshConfig(filePath)
+  })
+
+  ipcMain.handle(IPC.IMPORT_TERRAFORM, async (_event, filePath: string) => {
+    return importTerraform(filePath)
+  })
+
+  ipcMain.handle(IPC.IMPORT_ANSIBLE, async (_event, filePath: string) => {
+    return importAnsible(filePath)
   })
 }

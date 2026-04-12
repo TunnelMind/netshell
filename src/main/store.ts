@@ -9,6 +9,11 @@ const DEFAULT_SETTINGS: AppSettings = {
   fontSize: 14,
   scrollback: 10000,
   defaultLogDir: '',
+  ollamaUrl: 'http://localhost:11434',
+  ollamaModel: 'llama3.2',
+  aiEnabled: true,
+  recordingEnabled: false,
+  pqSshEnabled: false,
 }
 
 function getStorePath(): string {
@@ -22,6 +27,11 @@ function defaults(): StoreData {
     settings: { ...DEFAULT_SETTINGS, defaultLogDir: path.join(app.getPath('userData'), 'logs') },
     snippets: [],
     scripts: [],
+    templates: [],
+    compliancePolicies: [],
+    recordings: [],
+    topologyNodes: [],
+    topologyLinks: [],
   }
 }
 
@@ -31,11 +41,16 @@ export function load(): StoreData {
     const parsed = JSON.parse(raw) as Partial<StoreData>
     const d = defaults()
     return {
-      sessions: parsed.sessions ?? d.sessions,
-      credentials: parsed.credentials ?? d.credentials,
-      settings: { ...d.settings, ...(parsed.settings ?? {}) },
-      snippets: parsed.snippets ?? d.snippets,
-      scripts: parsed.scripts ?? d.scripts,
+      sessions:           parsed.sessions           ?? d.sessions,
+      credentials:        parsed.credentials        ?? d.credentials,
+      settings:           { ...d.settings, ...(parsed.settings ?? {}) },
+      snippets:           parsed.snippets           ?? d.snippets,
+      scripts:            parsed.scripts            ?? d.scripts,
+      templates:          parsed.templates          ?? d.templates,
+      compliancePolicies: parsed.compliancePolicies ?? d.compliancePolicies,
+      recordings:         parsed.recordings         ?? d.recordings,
+      topologyNodes:      parsed.topologyNodes      ?? d.topologyNodes,
+      topologyLinks:      parsed.topologyLinks      ?? d.topologyLinks,
     }
   } catch {
     return defaults()

@@ -11,6 +11,18 @@ import { registerBroadcastHandlers } from './main/ipc/broadcast'
 import { registerImportHandlers } from './main/ipc/import'
 import { registerScriptHandlers } from './main/ipc/scripts'
 import { registerTftpHandlers, cleanupTftp } from './main/ipc/tftp'
+import { registerAiHandlers } from './main/ipc/ai'
+import { registerRecordingHandlers } from './main/ipc/recording'
+import { registerGnmiHandlers, cleanupGnmiConnections } from './main/ipc/gnmi'
+import { registerK8sHandlers, cleanupK8sConnections } from './main/ipc/k8s'
+import { registerSsmHandlers, cleanupSsmConnections } from './main/ipc/ssm'
+import { registerGitopsHandlers } from './main/ipc/gitops'
+import { registerComplianceHandlers } from './main/ipc/compliance'
+import { registerTemplateHandlers } from './main/ipc/templates'
+import { registerTopologyHandlers } from './main/ipc/topology'
+import { registerJitHandlers, cleanupJit } from './main/ipc/jit'
+import { registerNormalizeHandlers } from './main/ipc/normalize'
+import { registerLicenseHandlers, cleanupLicense } from './main/ipc/license'
 import { load, save } from './main/store'
 import { IPC } from './types'
 
@@ -54,6 +66,18 @@ registerBroadcastHandlers()
 registerImportHandlers()
 registerScriptHandlers()
 registerTftpHandlers()
+registerAiHandlers()
+registerRecordingHandlers()
+registerGnmiHandlers()
+registerK8sHandlers()
+registerSsmHandlers()
+registerGitopsHandlers()
+registerComplianceHandlers()
+registerTemplateHandlers()
+registerTopologyHandlers()
+registerJitHandlers()
+registerNormalizeHandlers()
+registerLicenseHandlers()
 
 // Settings handlers
 ipcMain.handle(IPC.SETTINGS_GET, () => load().settings)
@@ -120,6 +144,11 @@ function cleanupAll() {
   cleanupSerialConnections()
   cleanupTelnetConnections()
   cleanupTftp()
+  cleanupGnmiConnections()
+  cleanupK8sConnections()
+  cleanupSsmConnections()
+  cleanupJit()
+  cleanupLicense()
 }
 
 app.on('window-all-closed', () => {
