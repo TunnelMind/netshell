@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { Session, CredentialMeta, SessionType, AuthType } from '../types'
+import MerakiOrgPicker from './MerakiOrgPicker'
 
 const EMPTY: Omit<Session, 'id'> = {
   name: '',
@@ -29,6 +30,12 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
     ...EMPTY,
     ...(session ?? {}),
   }))
+  const [serialPorts, setSerialPorts] = useState<{ path: string; manufacturer: string }[]>([])
+  const [showOrgPicker, setShowOrgPicker] = useState(false)
+
+  useEffect(() => {
+    window.api.serial.list().then(setSerialPorts).catch(() => {})
+  }, [])
 
   const set = <K extends keyof typeof form>(k: K, v: typeof form[K]) =>
     setForm(prev => ({ ...prev, [k]: v }))
@@ -44,6 +51,7 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
   const isMeraki = form.type === 'meraki'
 
   return (
+    <>
     <Overlay onClose={onClose}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-bright)', marginBottom: 4 }}>
@@ -98,11 +106,22 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
         {isSerial && (
           <>
             <Row label="Port">
-              <input
-                value={form.serialPort ?? ''}
-                onChange={e => set('serialPort', e.target.value)}
-                placeholder="COM3 or /dev/ttyUSB0"
-              />
+              {serialPorts.length > 0 ? (
+                <select value={form.serialPort ?? ''} onChange={e => set('serialPort', e.target.value)}>
+                  <option value="">— Select port —</option>
+                  {serialPorts.map(p => (
+                    <option key={p.path} value={p.path}>
+                      {p.path}{p.manufacturer ? ` (${p.manufacturer})` : ''}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={form.serialPort ?? ''}
+                  onChange={e => set('serialPort', e.target.value)}
+                  placeholder="COM3 or /dev/ttyUSB0"
+                />
+              )}
             </Row>
             <Row label="Baud Rate">
               <select value={form.baudRate ?? 9600} onChange={e => set('baudRate', parseInt(e.target.value, 10))}>
@@ -166,17 +185,29 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
         {isMeraki && (
           <>
             <Row label="Org ID">
-              <input
-                value={form.orgId ?? ''}
-                onChange={e => set('orgId', e.target.value)}
-                placeholder="Optional — can browse after connecting"
-              />
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input
+                  value={form.orgId ?? ''}
+                  onChange={e => set('orgId', e.target.value)}
+                  placeholder="Optional"
+                  style={{ flex: 1 }}
+                />
+                {form.credentialId && (
+                  <button
+                    type="button"
+                    onClick={() => setShowOrgPicker(true)}
+                    style={{ background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text-dim)', borderRadius: 4, padding: '4px 10px', fontSize: 11, flexShrink: 0 }}
+                  >
+                    Browse
+                  </button>
+                )}
+              </div>
             </Row>
             <Row label="Network ID">
               <input
                 value={form.networkId ?? ''}
                 onChange={e => set('networkId', e.target.value)}
-                placeholder="Optional"
+                placeholder="Auto-filled when you browse"
               />
             </Row>
           </>
@@ -226,6 +257,18 @@ export default function SessionForm({ session, credentials, onSave, onClose }: P
         </div>
       </form>
     </Overlay>
+    {showOrgPicker && form.credentialId && (
+      <MerakiOrgPicker
+        credentialId={form.credentialId}
+        onSelect={(orgId, _orgName, networkId, _networkName) => {
+          set('orgId', orgId)
+          set('networkId', networkId)
+          setShowOrgPicker(false)
+        }}
+        onClose={() => setShowOrgPicker(false)}
+      />
+    )}
+    </>
   )
 }
 

@@ -1,12 +1,11 @@
-// Type declarations for window.api (exposed via preload contextBridge)
-import type { Session, CredentialMeta, Snippet, AppSettings } from './types'
+import type { Session, CredentialMeta, Snippet, AppSettings, BroadcastTarget, MerakiOrg, MerakiNetwork } from './types'
 
 declare global {
   interface Window {
     api: {
       sessions: {
         getAll: () => Promise<Session[]>
-        save: (session: Session) => Promise<Session>
+        save: (s: Session) => Promise<Session>
         delete: (id: string) => Promise<void>
       }
       credentials: {
@@ -16,30 +15,50 @@ declare global {
       }
       snippets: {
         getAll: () => Promise<Snippet[]>
-        save: (snippet: Snippet) => Promise<Snippet>
+        save: (s: Snippet) => Promise<Snippet>
         delete: (id: string) => Promise<void>
       }
       settings: {
         get: () => Promise<AppSettings>
-        save: (settings: Partial<AppSettings>) => Promise<void>
+        save: (s: Partial<AppSettings>) => Promise<void>
       }
       ssh: {
-        connect: (params: {
-          sessionId: string
-          host: string
-          port: number
-          credentialId: string
-          authType: 'password' | 'key'
-          privateKeyPath?: string
-          rows: number
-          cols: number
-        }) => Promise<{ connId: string }>
-        write: (connId: string, data: string) => Promise<void>
-        resize: (connId: string, rows: number, cols: number) => Promise<void>
+        connect: (p: { sessionId: string; host: string; port: number; credentialId: string; authType: 'password'|'key'; privateKeyPath?: string; rows: number; cols: number }) => Promise<{ connId: string }>
+        write:      (connId: string, data: string) => Promise<void>
+        resize:     (connId: string, rows: number, cols: number) => Promise<void>
         disconnect: (connId: string) => Promise<void>
-        onData: (cb: (connId: string, data: string) => void) => () => void
+        onData:   (cb: (connId: string, data: string) => void) => () => void
         onClosed: (cb: (connId: string) => void) => () => void
-        onError: (cb: (connId: string, message: string) => void) => () => void
+        onError:  (cb: (connId: string, msg: string) => void) => () => void
+      }
+      serial: {
+        list: () => Promise<{ path: string; manufacturer: string }[]>
+        connect: (p: { sessionId: string; path: string; baudRate: number; dataBits: 5|6|7|8; stopBits: 1|2; parity: 'none'|'even'|'odd' }) => Promise<{ connId: string }>
+        write:      (connId: string, data: string) => Promise<void>
+        disconnect: (connId: string) => Promise<void>
+        onData:   (cb: (connId: string, data: string) => void) => () => void
+        onClosed: (cb: (connId: string) => void) => () => void
+        onError:  (cb: (connId: string, msg: string) => void) => () => void
+      }
+      telnet: {
+        connect: (p: { sessionId: string; host: string; port: number }) => Promise<{ connId: string }>
+        write:      (connId: string, data: string) => Promise<void>
+        disconnect: (connId: string) => Promise<void>
+        onData:   (cb: (connId: string, data: string) => void) => () => void
+        onClosed: (cb: (connId: string) => void) => () => void
+        onError:  (cb: (connId: string, msg: string) => void) => () => void
+      }
+      meraki: {
+        check:        () => Promise<boolean>
+        exec:         (p: { execId: string; credentialId: string; command: string }) => Promise<void>
+        listOrgs:     (credentialId: string) => Promise<MerakiOrg[]>
+        listNetworks: (credentialId: string, orgId: string) => Promise<MerakiNetwork[]>
+        onData:  (cb: (execId: string, data: string) => void) => () => void
+        onDone:  (cb: (execId: string, code: number) => void) => () => void
+        onError: (cb: (execId: string, msg: string) => void) => () => void
+      }
+      broadcast: {
+        write: (targets: BroadcastTarget[], data: string) => Promise<void>
       }
     }
   }

@@ -1,7 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { registerSessionHandlers } from './main/ipc/sessions'
 import { registerCredentialHandlers } from './main/ipc/credentials'
-import { registerSshHandlers, cleanupAllConnections } from './main/ipc/ssh'
+import { registerSshHandlers, cleanupAllConnections as cleanupSsh } from './main/ipc/ssh'
+import { registerSerialHandlers, cleanupSerialConnections } from './main/ipc/serial'
+import { registerTelnetHandlers, cleanupTelnetConnections } from './main/ipc/telnet'
+import { registerMerakiHandlers } from './main/ipc/meraki'
+import { registerBroadcastHandlers } from './main/ipc/broadcast'
 import { load, save } from './main/store'
 import { IPC } from './types'
 
@@ -38,6 +42,10 @@ function createWindow(): void {
 registerSessionHandlers()
 registerCredentialHandlers()
 registerSshHandlers()
+registerSerialHandlers()
+registerTelnetHandlers()
+registerMerakiHandlers()
+registerBroadcastHandlers()
 
 // Settings handlers
 ipcMain.handle(IPC.SETTINGS_GET, () => load().settings)
@@ -67,8 +75,14 @@ ipcMain.handle(IPC.SNIPPETS_DELETE, (_event, id: string) => {
 
 app.on('ready', createWindow)
 
+function cleanupAll() {
+  cleanupSsh()
+  cleanupSerialConnections()
+  cleanupTelnetConnections()
+}
+
 app.on('window-all-closed', () => {
-  cleanupAllConnections()
+  cleanupAll()
   if (process.platform !== 'darwin') app.quit()
 })
 
@@ -76,6 +90,4 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-app.on('before-quit', () => {
-  cleanupAllConnections()
-})
+app.on('before-quit', cleanupAll)

@@ -87,6 +87,11 @@ export interface OpenTab {
   title: string
 }
 
+export interface MerakiOrg   { id: string; name: string }
+export interface MerakiNetwork { id: string; name: string; type: string }
+
+export interface BroadcastTarget { tabId: string; connId: string; type: SessionType }
+
 // IPC channel names — single source of truth
 export const IPC = {
   SESSIONS_GET_ALL: 'sessions:getAll',
@@ -100,6 +105,7 @@ export const IPC = {
   SNIPPETS_DELETE: 'snippets:delete',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SAVE: 'settings:save',
+  // SSH
   SSH_CONNECT: 'ssh:connect',
   SSH_WRITE: 'ssh:write',
   SSH_RESIZE: 'ssh:resize',
@@ -107,4 +113,29 @@ export const IPC = {
   SSH_DATA: 'ssh:data',
   SSH_CLOSED: 'ssh:closed',
   SSH_ERROR: 'ssh:error',
+  // Serial
+  SERIAL_LIST: 'serial:list',
+  SERIAL_CONNECT: 'serial:connect',
+  SERIAL_WRITE: 'serial:write',
+  SERIAL_DISCONNECT: 'serial:disconnect',
+  SERIAL_DATA: 'serial:data',
+  SERIAL_CLOSED: 'serial:closed',
+  SERIAL_ERROR: 'serial:error',
+  // Telnet
+  TELNET_CONNECT: 'telnet:connect',
+  TELNET_WRITE: 'telnet:write',
+  TELNET_DISCONNECT: 'telnet:disconnect',
+  TELNET_DATA: 'telnet:data',
+  TELNET_CLOSED: 'telnet:closed',
+  TELNET_ERROR: 'telnet:error',
+  // Meraki
+  MERAKI_CHECK: 'meraki:check',
+  MERAKI_EXEC: 'meraki:exec',
+  MERAKI_DATA: 'meraki:data',
+  MERAKI_DONE: 'meraki:done',
+  MERAKI_ERROR: 'meraki:error',
+  MERAKI_LIST_ORGS: 'meraki:listOrgs',
+  MERAKI_LIST_NETWORKS: 'meraki:listNetworks',
+  // Broadcast
+  BROADCAST_WRITE: 'broadcast:write',
 } as const
