@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import { IPC } from '../../types'
 import { load } from '../store'
 import { getSecret } from './credentials'
+import { notifyDataListeners } from './dataListeners'
 
 interface ActiveConn {
   client: Client
@@ -60,8 +61,10 @@ export function registerSshHandlers(): void {
           connections.set(connId, { client, stream, sender })
 
           stream.on('data', (data: Buffer) => {
+            const chunk = data.toString('binary')
+            notifyDataListeners(connId, chunk)
             if (!sender.isDestroyed()) {
-              sender.send(IPC.SSH_DATA, connId, data.toString('binary'))
+              sender.send(IPC.SSH_DATA, connId, chunk)
             }
           })
 

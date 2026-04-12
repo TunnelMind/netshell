@@ -1,4 +1,4 @@
-import type { Session, CredentialMeta, Snippet, AppSettings, BroadcastTarget, MerakiOrg, MerakiNetwork } from './types'
+import type { Session, CredentialMeta, Snippet, AppSettings, BroadcastTarget, MerakiOrg, MerakiNetwork, Script, ScriptProgress, TftpTransferEntry, AuditEntry } from './types'
 
 declare global {
   interface Window {
@@ -59,6 +59,32 @@ declare global {
       }
       broadcast: {
         write: (targets: BroadcastTarget[], data: string) => Promise<void>
+      }
+      import: {
+        putty: () => Promise<Partial<Session>[]>
+        sshConfig: (filePath?: string) => Promise<Partial<Session>[]>
+      }
+      scripts: {
+        getAll: () => Promise<Script[]>
+        save: (s: Script) => Promise<Script>
+        delete: (id: string) => Promise<void>
+        run: (p: { runId: string; scriptId: string; connId: string; connType: string; variables: Record<string,string> }) => Promise<void>
+        cancel: (runId: string) => Promise<void>
+        onProgress: (cb: (p: ScriptProgress) => void) => () => void
+        onDone: (cb: (runId: string, success: boolean) => void) => () => void
+      }
+      tftp: {
+        start: (p: { bindAddr: string; rootDir: string }) => Promise<void>
+        stop: () => Promise<void>
+        onStatus: (cb: (running: boolean) => void) => () => void
+        onTransfer: (cb: (entry: TftpTransferEntry) => void) => () => void
+      }
+      audit: {
+        getRecent: (limit?: number) => Promise<AuditEntry[]>
+      }
+      vaultToken: {
+        save: (token: string) => Promise<void>
+        test: () => Promise<{ ok: boolean; error?: string }>
       }
     }
   }

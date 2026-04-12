@@ -1,6 +1,7 @@
 import { ipcMain, WebContents } from 'electron'
 import { SerialPort } from 'serialport'
 import { IPC } from '../../types'
+import { notifyDataListeners } from './dataListeners'
 
 interface ActiveSerial {
   port: SerialPort
@@ -48,8 +49,10 @@ export function registerSerialHandlers(): void {
         connections.set(connId, { port, sender })
 
         port.on('data', (data: Buffer) => {
+          const chunk = data.toString('binary')
+          notifyDataListeners(connId, chunk)
           if (!sender.isDestroyed()) {
-            sender.send(IPC.SERIAL_DATA, connId, data.toString('binary'))
+            sender.send(IPC.SERIAL_DATA, connId, chunk)
           }
         })
 

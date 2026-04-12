@@ -1,11 +1,16 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
+import * as fs from 'fs'
+import * as path from 'path'
 import { registerSessionHandlers } from './main/ipc/sessions'
-import { registerCredentialHandlers } from './main/ipc/credentials'
+import { registerCredentialHandlers, saveVaultToken, getVaultToken } from './main/ipc/credentials'
 import { registerSshHandlers, cleanupAllConnections as cleanupSsh } from './main/ipc/ssh'
 import { registerSerialHandlers, cleanupSerialConnections } from './main/ipc/serial'
 import { registerTelnetHandlers, cleanupTelnetConnections } from './main/ipc/telnet'
 import { registerMerakiHandlers } from './main/ipc/meraki'
 import { registerBroadcastHandlers } from './main/ipc/broadcast'
+import { registerImportHandlers } from './main/ipc/import'
+import { registerScriptHandlers } from './main/ipc/scripts'
+import { registerTftpHandlers, cleanupTftp } from './main/ipc/tftp'
 import { load, save } from './main/store'
 import { IPC } from './types'
 
@@ -46,6 +51,9 @@ registerSerialHandlers()
 registerTelnetHandlers()
 registerMerakiHandlers()
 registerBroadcastHandlers()
+registerImportHandlers()
+registerScriptHandlers()
+registerTftpHandlers()
 
 // Settings handlers
 ipcMain.handle(IPC.SETTINGS_GET, () => load().settings)
@@ -53,6 +61,38 @@ ipcMain.handle(IPC.SETTINGS_SAVE, (_event, settings) => {
   const data = load()
   data.settings = { ...data.settings, ...settings }
   save(data)
+})
+
+// Audit log handler
+ipcMain.handle(IPC.AUDIT_GET_RECENT, async (_e, limit = 500) => {
+  const logPath = path.join(app.getPath('userData'), 'netshell', 'audit.jsonl')
+  if (!fs.existsSync(logPath)) return []
+  try {
+    const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n').filter(Boolean)
+    return lines.slice(-limit).map((l: string) => JSON.parse(l)).reverse()
+  } catch {
+    return []
+  }
+})
+
+// Vault token handlers
+ipcMain.handle(IPC.SETTINGS_SAVE_VAULT_TOKEN, async (_e, token: string) => {
+  await saveVaultToken(token)
+})
+ipcMain.handle(IPC.SETTINGS_TEST_VAULT, async () => {
+  try {
+    const data = load()
+    if (!data.settings.vaultAddr) return { ok: false, error: 'No Vault address configured' }
+    const token = await getVaultToken()
+    if (!token) return { ok: false, error: 'No Vault token stored' }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const nodeVault = require('node-vault')
+    const client = nodeVault({ endpoint: data.settings.vaultAddr, token })
+    await client.health()
+    return { ok: true }
+  } catch (e: unknown) {
+    return { ok: false, error: (e as Error).message }
+  }
 })
 
 // Snippets handlers
@@ -79,6 +119,7 @@ function cleanupAll() {
   cleanupSsh()
   cleanupSerialConnections()
   cleanupTelnetConnections()
+  cleanupTftp()
 }
 
 app.on('window-all-closed', () => {

@@ -12,9 +12,16 @@ interface Props {
   onEdit: (s: Session) => void
   onDelete: (id: string) => void
   onManageCreds: () => void
+  onImport: () => void
+  onScripts: () => void
+  onSettings: () => void
+  onSnippets: () => void
+  onAudit: () => void
+  onDiff: () => void
+  onTftp: () => void
 }
 
-export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDelete, onManageCreds }: Props) {
+export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDelete, onManageCreds, onImport, onScripts, onSettings, onSnippets, onAudit, onDiff, onTftp }: Props) {
   const [query, setQuery] = useState('')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [ctxMenu, setCtxMenu] = useState<{ x: number, y: number, session: Session } | null>(null)
@@ -181,18 +188,24 @@ export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDele
         borderTop: '1px solid var(--border)',
         padding: '6px 8px',
         display: 'flex',
+        flexDirection: 'column',
         gap: 4,
         flexShrink: 0,
       }}>
-        <button
-          onClick={onManageCreds}
-          style={{
-            flex: 1, background: 'none', border: '1px solid var(--border)',
-            color: 'var(--text-dim)', borderRadius: 4, padding: '4px 0', fontSize: 11,
-          }}
-        >
-          Credentials
-        </button>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <FooterBtn onClick={onManageCreds}>Creds</FooterBtn>
+          <FooterBtn onClick={onImport}>Import</FooterBtn>
+          <FooterBtn onClick={onSnippets}>Snippets</FooterBtn>
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <FooterBtn onClick={onScripts}>Scripts</FooterBtn>
+          <FooterBtn onClick={onDiff}>Diff</FooterBtn>
+          <FooterBtn onClick={onTftp}>TFTP</FooterBtn>
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <FooterBtn onClick={onAudit}>Audit Log</FooterBtn>
+          <FooterBtn onClick={onSettings}>Settings</FooterBtn>
+        </div>
       </div>
 
       {/* Context menu */}
@@ -226,6 +239,20 @@ export default function SessionSidebar({ sessions, onOpen, onNew, onEdit, onDele
         </div>
       )}
     </div>
+  )
+}
+
+function FooterBtn({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        flex: 1, background: 'none', border: '1px solid var(--border)',
+        color: 'var(--text-dim)', borderRadius: 4, padding: '3px 0', fontSize: 10,
+      }}
+    >
+      {children}
+    </button>
   )
 }
 

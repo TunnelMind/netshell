@@ -6,6 +6,13 @@ import SessionForm from './components/SessionForm'
 import CredentialManager from './components/CredentialManager'
 import BroadcastBar from './components/BroadcastBar'
 import SnippetPicker from './components/SnippetPicker'
+import ImportWizard from './components/ImportWizard'
+import ScriptEditor from './components/ScriptEditor'
+import DiffViewer from './components/DiffViewer'
+import TftpServer from './components/TftpServer'
+import Settings from './components/Settings'
+import SnippetManager from './components/SnippetManager'
+import AuditLog from './components/AuditLog'
 import type { Session, CredentialMeta, OpenTab, Snippet, BroadcastTarget } from './types'
 
 export default function App() {
@@ -15,10 +22,17 @@ export default function App() {
   const [tabs,         setTabs]         = useState<OpenTab[]>([])
   const [activeTabId,  setActiveTabId]  = useState<string | null>(null)
   const [broadcast,    setBroadcast]    = useState<BroadcastTarget[]>([])
-  const [showSessions, setShowSessions] = useState(false)
-  const [editSession,  setEditSession]  = useState<Session | null>(null)
-  const [showCreds,    setShowCreds]    = useState(false)
-  const [showSnippets, setShowSnippets] = useState(false)
+  const [showSessions,   setShowSessions]   = useState(false)
+  const [editSession,    setEditSession]    = useState<Session | null>(null)
+  const [showCreds,      setShowCreds]      = useState(false)
+  const [showSnippets,   setShowSnippets]   = useState(false)
+  const [showImport,     setShowImport]     = useState(false)
+  const [showScripts,    setShowScripts]    = useState(false)
+  const [showSettings,   setShowSettings]   = useState(false)
+  const [showSnippetMgr, setShowSnippetMgr] = useState(false)
+  const [showAudit,      setShowAudit]      = useState(false)
+  const [showDiff,       setShowDiff]       = useState(false)
+  const [showTftp,       setShowTftp]       = useState(false)
 
   const loadData = useCallback(async () => {
     const [s, c, sn] = await Promise.all([
@@ -122,6 +136,13 @@ export default function App() {
         onEdit={s => { setEditSession(s); setShowSessions(true) }}
         onDelete={handleDeleteSession}
         onManageCreds={() => setShowCreds(true)}
+        onImport={() => setShowImport(true)}
+        onScripts={() => setShowScripts(true)}
+        onSettings={() => setShowSettings(true)}
+        onSnippets={() => setShowSnippetMgr(true)}
+        onAudit={() => setShowAudit(true)}
+        onDiff={() => setShowDiff(true)}
+        onTftp={() => setShowTftp(true)}
       />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
@@ -186,6 +207,42 @@ export default function App() {
           onSend={sendSnippet}
           onClose={() => setShowSnippets(false)}
         />
+      )}
+      {showImport && (
+        <ImportWizard
+          onImport={async (importedSessions) => {
+            for (const s of importedSessions) {
+              await window.api.sessions.save(s as Session)
+            }
+            await loadData()
+            setShowImport(false)
+          }}
+          onClose={() => setShowImport(false)}
+        />
+      )}
+      {showScripts && (
+        <ScriptEditor
+          tabs={tabs}
+          onClose={() => setShowScripts(false)}
+        />
+      )}
+      {showSettings && (
+        <Settings onClose={() => setShowSettings(false)} />
+      )}
+      {showSnippetMgr && (
+        <SnippetManager
+          onClose={() => setShowSnippetMgr(false)}
+          onRefresh={loadData}
+        />
+      )}
+      {showAudit && (
+        <AuditLog onClose={() => setShowAudit(false)} />
+      )}
+      {showDiff && (
+        <DiffViewer onClose={() => setShowDiff(false)} />
+      )}
+      {showTftp && (
+        <TftpServer onClose={() => setShowTftp(false)} />
       )}
     </div>
   )

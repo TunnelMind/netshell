@@ -54,3 +54,33 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
 .xterm { height: 100%; }
 .xterm-viewport { overflow-y: auto !important; }
+
+/* ── Themes ── Applied via JS: document.documentElement.style.setProperty() ── */
+/* Light */
+[data-theme="light"] {
+  --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2;
+  --border: #d0d7de; --text: #1f2328; --text-dim: #636c76;
+  --text-bright: #0d1117; --accent: #0969da; --accent-dim: #ddf4ff;
+  --green: #116329; --green-dim: #dafbe1; --amber: #953800; --red: #cf222e;
+}
+/* Solarized Dark */
+[data-theme="solarized"] {
+  --bg: #002b36; --bg2: #073642; --bg3: #0a4555;
+  --border: #1d5766; --text: #839496; --text-dim: #657b83;
+  --text-bright: #fdf6e3; --accent: #268bd2; --accent-dim: #0a2d45;
+  --green: #859900; --green-dim: #1a200a; --amber: #b58900; --red: #dc322f;
+}
+/* Dracula */
+[data-theme="dracula"] {
+  --bg: #282a36; --bg2: #1e1f29; --bg3: #44475a;
+  --border: #6272a4; --text: #f8f8f2; --text-dim: #6272a4;
+  --text-bright: #ffffff; --accent: #bd93f9; --accent-dim: #3a2d5e;
+  --green: #50fa7b; --green-dim: #1a3a1e; --amber: #ffb86c; --red: #ff5555;
+}
+/* Nord */
+[data-theme="nord"] {
+  --bg: #2e3440; --bg2: #3b4252; --bg3: #434c5e;
+  --border: #4c566a; --text: #d8dee9; --text-dim: #7b88a1;
+  --text-bright: #eceff4; --accent: #81a1c1; --accent-dim: #2b4055;
+  --green: #a3be8c; --green-dim: #2a3d24; --amber: #ebcb8b; --red: #bf616a;
+}

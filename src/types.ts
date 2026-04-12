@@ -57,6 +57,29 @@ export interface Script {
   id: string
   name: string
   steps: ScriptStep[]
+  schedule?: string   // cron expression, e.g. "0 */6 * * *"
+}
+
+export interface ScriptProgress {
+  runId: string
+  stepIndex: number
+  status: 'running' | 'passed' | 'failed' | 'timeout'
+  output?: string
+}
+
+export interface TftpTransferEntry {
+  file: string
+  client: string
+  size: number
+  status: string
+  ts: number
+}
+
+export interface AuditEntry {
+  ts: number
+  session: string
+  type: 'connect' | 'disconnect' | 'command' | 'error'
+  data?: string
 }
 
 export interface AppSettings {
@@ -138,4 +161,25 @@ export const IPC = {
   MERAKI_LIST_NETWORKS: 'meraki:listNetworks',
   // Broadcast
   BROADCAST_WRITE: 'broadcast:write',
+  // Import
+  IMPORT_PUTTY:          'import:putty',
+  IMPORT_SSH_CONFIG:     'import:sshConfig',
+  // Scripts
+  SCRIPTS_GET_ALL:       'scripts:getAll',
+  SCRIPTS_SAVE:          'scripts:save',
+  SCRIPTS_DELETE:        'scripts:delete',
+  SCRIPT_RUN:            'script:run',
+  SCRIPT_CANCEL:         'script:cancel',
+  SCRIPT_PROGRESS:       'script:progress',
+  SCRIPT_DONE:           'script:done',
+  // TFTP
+  TFTP_START:            'tftp:start',
+  TFTP_STOP:             'tftp:stop',
+  TFTP_STATUS:           'tftp:status',
+  TFTP_TRANSFER:         'tftp:transfer',
+  // Audit
+  AUDIT_GET_RECENT:      'audit:getRecent',
+  // Settings vault token (keytar-backed, main-only)
+  SETTINGS_SAVE_VAULT_TOKEN: 'settings:saveVaultToken',
+  SETTINGS_TEST_VAULT:       'settings:testVault',
 } as const

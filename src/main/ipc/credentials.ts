@@ -69,7 +69,49 @@ export function registerCredentialHandlers(): void {
 
 // Exported for use by ssh.ts / meraki.ts — never sent to renderer
 export async function getSecret(credentialId: string, key: 'password' | 'apitoken' | 'passphrase'): Promise<string | null> {
+  const data = load()
+  const meta = data.credentials.find(c => c.id === credentialId)
+
+  // Vault path integration: if vaultPath set, fetch from HashiCorp Vault at connect time
+  if (meta?.vaultPath && data.settings.vaultAddr) {
+    try {
+      const kt = await getKeytar()
+      const vaultToken = kt ? await kt.getPassword(SERVICE, 'vault-token') : null
+      if (vaultToken) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const nodeVault = require('node-vault')
+        const client = nodeVault({ endpoint: data.settings.vaultAddr, token: vaultToken })
+        const result = await client.read(meta.vaultPath)
+        // KV v2: result.data.data, KV v1: result.data
+        const secretData = result?.data?.data ?? result?.data ?? {}
+        // Map our key names to common vault field names
+        const fieldMap: Record<string, string[]> = {
+          password:   ['password', 'pass', 'secret'],
+          apitoken:   ['apiToken', 'api_token', 'token'],
+          passphrase: ['passphrase', 'key_passphrase'],
+        }
+        for (const field of (fieldMap[key] ?? [key])) {
+          if (secretData[field]) return secretData[field]
+        }
+      }
+    } catch (e) {
+      console.warn(`Vault fetch failed for ${credentialId}:${key}:`, e)
+    }
+  }
+
   const kt = await getKeytar()
   if (!kt) return null
   return kt.getPassword(SERVICE, `${credentialId}:${key}`)
+}
+
+// Store and retrieve vault token (main-process only, stays in keytar)
+export async function saveVaultToken(token: string): Promise<void> {
+  const kt = await getKeytar()
+  if (kt) await kt.setPassword(SERVICE, 'vault-token', token)
+}
+
+export async function getVaultToken(): Promise<string | null> {
+  const kt = await getKeytar()
+  if (!kt) return null
+  return kt.getPassword(SERVICE, 'vault-token')
 }

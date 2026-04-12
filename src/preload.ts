@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from './types'
-import type { Session, CredentialMeta, Snippet, AppSettings, BroadcastTarget } from './types'
+import type { Session, CredentialMeta, Snippet, AppSettings, BroadcastTarget, Script, ScriptProgress, TftpTransferEntry, AuditEntry } from './types'
 
 function on(channel: string, cb: (...args: unknown[]) => void) {
   const h = (_: Electron.IpcRendererEvent, ...args: unknown[]) => cb(...args)
@@ -70,6 +70,33 @@ contextBridge.exposeInMainWorld('api', {
   broadcast: {
     write: (targets: BroadcastTarget[], data: string): Promise<void> =>
       ipcRenderer.invoke(IPC.BROADCAST_WRITE, targets, data),
+  },
+  import: {
+    putty: (): Promise<Partial<Session>[]> => ipcRenderer.invoke(IPC.IMPORT_PUTTY),
+    sshConfig: (filePath?: string): Promise<Partial<Session>[]> => ipcRenderer.invoke(IPC.IMPORT_SSH_CONFIG, filePath),
+  },
+  scripts: {
+    getAll: (): Promise<Script[]> => ipcRenderer.invoke(IPC.SCRIPTS_GET_ALL),
+    save: (s: Script): Promise<Script> => ipcRenderer.invoke(IPC.SCRIPTS_SAVE, s),
+    delete: (id: string): Promise<void> => ipcRenderer.invoke(IPC.SCRIPTS_DELETE, id),
+    run: (p: { runId: string; scriptId: string; connId: string; connType: string; variables: Record<string,string> }): Promise<void> =>
+      ipcRenderer.invoke(IPC.SCRIPT_RUN, p),
+    cancel: (runId: string): Promise<void> => ipcRenderer.invoke(IPC.SCRIPT_CANCEL, runId),
+    onProgress: (cb: (p: ScriptProgress) => void) => on(IPC.SCRIPT_PROGRESS, (p) => cb(p as ScriptProgress)),
+    onDone: (cb: (runId: string, success: boolean) => void) => on(IPC.SCRIPT_DONE, (id, ok) => cb(id as string, ok as boolean)),
+  },
+  tftp: {
+    start: (p: { bindAddr: string; rootDir: string }): Promise<void> => ipcRenderer.invoke(IPC.TFTP_START, p),
+    stop: (): Promise<void> => ipcRenderer.invoke(IPC.TFTP_STOP),
+    onStatus: (cb: (running: boolean) => void) => on(IPC.TFTP_STATUS, (r) => cb(r as boolean)),
+    onTransfer: (cb: (entry: TftpTransferEntry) => void) => on(IPC.TFTP_TRANSFER, (e) => cb(e as TftpTransferEntry)),
+  },
+  audit: {
+    getRecent: (limit?: number): Promise<AuditEntry[]> => ipcRenderer.invoke(IPC.AUDIT_GET_RECENT, limit),
+  },
+  vaultToken: {
+    save: (token: string): Promise<void> => ipcRenderer.invoke(IPC.SETTINGS_SAVE_VAULT_TOKEN, token),
+    test: (): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke(IPC.SETTINGS_TEST_VAULT),
   },
 })
 

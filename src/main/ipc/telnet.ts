@@ -1,6 +1,7 @@
 import { ipcMain, WebContents } from 'electron'
 import * as net from 'net'
 import { IPC } from '../../types'
+import { notifyDataListeners } from './dataListeners'
 
 // Telnet control bytes
 const IAC  = 0xFF
@@ -75,8 +76,12 @@ export function registerTelnetHandlers(): void {
 
       socket.on('data', (raw: Buffer) => {
         const clean = processTelnet(raw, socket)
-        if (clean.length > 0 && !sender.isDestroyed()) {
-          sender.send(IPC.TELNET_DATA, connId, clean.toString('binary'))
+        if (clean.length > 0) {
+          const chunk = clean.toString('binary')
+          notifyDataListeners(connId, chunk)
+          if (!sender.isDestroyed()) {
+            sender.send(IPC.TELNET_DATA, connId, chunk)
+          }
         }
       })
 
