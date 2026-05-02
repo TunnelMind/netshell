@@ -52,10 +52,9 @@ jobs:
       - name: Build and make installers
         run: npm run make
         env:
-          # Disable code signing by default — set these secrets to enable
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           CI: true
 
       # Upload each platform's installer as a workflow artifact
@@ -125,9 +124,8 @@ jobs:
             ```
 
             ### macOS note
-            If Gatekeeper blocks the app: right-click → Open → Open.
-            For fully signed/notarized builds, set APPLE_ID, APPLE_ID_PASSWORD,
-            and APPLE_TEAM_ID secrets in this repository.
+            Notarized builds pass Gatekeeper automatically. If Gatekeeper blocks the app
+            on an unsigned build: right-click → Open → Open.
 
       - name: Trigger package repo update
         if: ${{ !contains(github.ref_name, '-') }}

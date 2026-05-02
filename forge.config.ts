@@ -23,7 +23,23 @@ const config: ForgeConfig = {
     // Extra files placed outside the asar archive in the app's resources dir.
     // gnmi.proto must be accessible at runtime for @grpc/proto-loader.
     extraResource: ['src/main/gnmi.proto'],
-    // icon: './assets/icon', // electron-packager will auto-detect .ico/.icns/.png by platform
+    icon: './assets/icon', // auto-detects .ico (Windows), .icns (macOS), .png (Linux)
+
+    // macOS code signing — skipped when APPLE_TEAM_ID is not set
+    osxSign: process.env.APPLE_TEAM_ID ? {
+      identity: `Developer ID Application: Josh Moore (${process.env.APPLE_TEAM_ID})`,
+      hardenedRuntime: true,
+      entitlements: './entitlements.plist',
+      'entitlements-inherit': './entitlements.plist',
+    } : undefined,
+
+    // macOS notarization — skipped when APPLE_ID is not set
+    osxNotarize: process.env.APPLE_ID ? {
+      tool: 'notarytool',
+      appleId: process.env.APPLE_ID,
+      appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+      teamId: process.env.APPLE_TEAM_ID!,
+    } : undefined,
   },
   rebuildConfig: {},
   makers: [
