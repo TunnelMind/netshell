@@ -35,6 +35,10 @@ Exit codes (ADR-032 §3):
 - `2` Usage error: unknown command or flag, missing flag, bad `--vendor`, or an unreadable file. Nothing on stdout.
 - `3` The input could not be parsed, including empty input. Nothing on stdout.
 
+`nsh render` runs the template as code: nunjucks is not a sandbox, so a
+template can read environment variables. Use only templates you trust as you
+would a script. See ADR-032 §4.
+
 ### jq pipelines
 
 Interfaces that are not up:

@@ -164,6 +164,13 @@ The only files it reads are the ones named on the command line, and it writes
 only to stdout and stderr. SC-003 enforces part of this: zero `electron`
 imports under `src/core/` and `src/cli/`, checked by `npm test`.
 
+**Templates are trusted code.** nunjucks (`src/core/templates.ts:10-13`) is
+not a sandbox. A template file can reach JavaScript, for example with
+`range.constructor(...)()`, so it can read `process.env` and anything else the
+process can reach. The MUST NOT list above describes what `nsh` itself does;
+it does not bind a hostile template. Only pass `--template` files you would
+run as a script. Do not render templates from untrusted sources.
+
 **Out of scope** (spec, Out of Scope), with its own spec, ADR and gate:
 live device sessions (SSH/Telnet/serial/SSM), the credential vault and JIT
 access, gNMI, TFTP, Meraki, k8s, an MCP server, and licence-gating changes in
