@@ -1,13 +1,13 @@
 /**
- * Runs every fixture through the CURRENT pure logic in src/main/ipc and
+ * Runs every fixture through the CURRENT pure logic in src/core and
  * returns { goldenFileName: value }. Shared by capture-golden.ts (writes
  * tests/golden/) and golden.test.ts (compares), so both see the same cases.
  */
 import { handlers, store, commandOutput, resetUuid } from './helpers/fakes'
 import * as fs from 'fs'
 import * as path from 'path'
-import { parseInterfaces, parseBgp, parseArp, parseDevice } from '../src/main/ipc/normalize'
-import { evaluateCheck, BUILTIN_POLICIES } from '../src/main/ipc/compliance'
+import { parseInterfaces, parseBgp, parseArp, parseDevice } from '../src/core/normalize'
+import { evaluateCheck, BUILTIN_POLICIES } from '../src/core/compliance'
 import { registerTemplateHandlers } from '../src/main/ipc/templates'
 import { registerTopologyHandlers } from '../src/main/ipc/topology'
 import { IPC } from '../src/types'
