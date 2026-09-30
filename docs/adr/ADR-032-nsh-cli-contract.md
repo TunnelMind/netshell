@@ -135,8 +135,11 @@ Field names are taken from the cited interfaces. Values are illustrative.
 {"schema":"nsh/1","command":"topology lldp","vendor":null,"data":{"nodes":[{"id":"n1","label":"core-sw1","host":"10.0.0.254","type":"switch"}],"links":[{"id":"l1","source":"local","target":"n1","label":"Gi0/1 — Ethernet1/1"}]},"warnings":[]}
 ```
 
-In the topology example the `id`, `source` and `target` values are
-placeholders. How to make them deterministic is open question 2.
+The topology example is real output. Core gives nodes and links random
+`uuidv4()` ids, so `nsh` renumbers them `n1`..`nN` for nodes and `l1`..`lN`
+for links, in parse order, and rewrites each `link.target` to match. Every
+`link.source` is the literal `"local"` (`src/cli/nsh.ts:200-208`). The same
+input always gives the same bytes. See Resolution 2.
 
 ### 3. Exit codes (FR-005)
 
@@ -147,9 +150,9 @@ placeholders. How to make them deterministic is open question 2.
 | 2 | Usage error: unknown command or subcommand, unknown or missing flag, a `--vendor` outside the `Vendor` union, or an unreadable `--policy`/`--template`/`--vars`/`--config` file. | **Empty** | A one-line message and usage |
 | 3 | The input could not be parsed. **Empty input is always 3**, never an empty success. It covers empty or whitespace-only input, text the parser cannot read (spec.md:32), and a policy, template or vars file that is not valid JSON. | **Empty** | A message saying what was expected (for example "expected IOS `show interfaces` output") |
 
-Exit 0 is never used to mean "could not read this". How to tell unreadable
-text from a legitimately empty table (for example, a device with no BGP
-peers) is still open: see Open question 1.
+Exit 0 is never used to mean "could not read this". A genuinely empty table
+(for example, a device with no BGP peers) is also exit 3, because it cannot be
+told apart from unreadable text: see Resolution 1.
 
 ### 4. No network, no credentials, no store (FR-006)
 
@@ -203,8 +206,8 @@ the app.
 
 ## Open questions
 
-These are disagreements or gaps between the spec and the current code. This
-ADR does not settle them; Josh decides at GATE 1.
+These are disagreements or gaps between the spec and the current code. They were
+settled at GATE 1; the answers are recorded under Resolutions below.
 
 1. **Exit 3 vs. current parsers.** `parseInterfaces`, `parseBgp` and
    `parseArp` return `[]`, and `parseDevice` returns `{vendor}`, for text they
@@ -237,3 +240,34 @@ ADR does not settle them; Josh decides at GATE 1.
 7. **Positional file argument.** FR-003 says "input from a file argument or
    stdin" but gives a flag only for `comply` (`--config`). This ADR assumes a
    single positional path for `normalize` and `topology lldp`.
+
+## Resolutions
+
+What the code does for each open question above, by the same number.
+
+1. **Empty table → exit 3.** The CLI makes the check, not core. It treats a
+   parser result of `[]` or a bare `{vendor}` as "nothing parsed" and exits 3
+   (`src/cli/nsh.ts:142-146`), so a device with no BGP peers also exits 3.
+   Empty or whitespace-only input is exit 3 before any parser runs
+   (`src/cli/nsh.ts:120`). `topology lldp` with no neighbors is exit 3
+   (`src/cli/nsh.ts:201`).
+2. **Fixed source, renumbered ids.** Every link's `source` is the fixed string
+   `"local"`. Node ids are `n1`..`nN` and link ids `l1`..`lN` in parse order,
+   and `link.target` is rewritten to the new node id
+   (`src/cli/nsh.ts:200-208`). There is no `--local-node` flag.
+3. **No CDP fallback.** `topology lldp` parses LLDP only
+   (`src/cli/nsh.ts:199-200`). CDP text finds no neighbors and exits 3.
+4. **`check.command` is ignored.** Every check's regex runs against the whole
+   `--config` text (`src/cli/nsh.ts:169-170`). Checks written for other show
+   commands (such as `show ntp status`) can give different results than in
+   the app.
+5. **`--policy` is a file path only.** Its value is read as a JSON file
+   (`src/cli/nsh.ts:152-153`); built-in ids such as `builtin-ios-cis` are not
+   accepted. A path that does not exist is exit 2, per §3.
+6. **Render error → exit 3.** A nunjucks failure exits 3 with
+   `render failed: <nunjucks message>` on stderr and empty stdout
+   (`src/cli/nsh.ts:191`).
+7. **Positional FILE.** `normalize` and `topology lldp` take one optional
+   positional FILE; with no FILE they read stdin
+   (`src/cli/nsh.ts:119`, `:133`, `:196`). An extra positional is exit 2
+   (`src/cli/nsh.ts:123-125`, `:136`, `:198`).
