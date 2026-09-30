@@ -219,9 +219,10 @@ function run(argv: string[], readStdin: () => string): Result {
 
 if (require.main === module) {
   const r = main(process.argv.slice(2))
-  // A closed reader (`nsh … | head`) is not an error: exit 0 quietly, the Unix EPIPE convention.
+  // A closed reader (`nsh … | head`) is not an error: exit quietly with the command's own
+  // status, so `comply` failures still exit 1 behind `| head`.
   process.stdout.on('error', (err: NodeJS.ErrnoException) => {
-    if (err.code === 'EPIPE') process.exit(0)
+    if (err.code === 'EPIPE') process.exit(r.code)
     throw err
   })
   process.stdout.write(r.stdout)

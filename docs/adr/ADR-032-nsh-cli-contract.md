@@ -82,7 +82,7 @@ a newline:
 | `normalize arp` | `NormalizedArpEntry[]` (`src/types.ts:260`) |
 | `normalize device` | `NormalizedDeviceInfo` (`src/types.ts:267`), one object |
 | `comply` | `ComplianceResult[]` (`src/types.ts:176`), one per check in policy order |
-| `render` | `{ "rendered": string }`, the success value of `TEMPLATES_RENDER` (`src/core/templates.ts:32`) |
+| `render` | `{ "rendered": string }`, the success value of `TEMPLATES_RENDER` (`core/templates.ts renderTemplate`) |
 | `topology lldp` | `{ "nodes": TopologyNode[], "links": TopologyLink[] }` (`src/types.ts:219`, `:228`), the value of `TOPOLOGY_LLDP_DISCOVER` (`src/main/ipc/topology.ts:30`) |
 
 **Why `ComplianceResult[]` and not `ComplianceScanResult`** (`src/types.ts:185`):
@@ -139,7 +139,7 @@ Field names are taken from the cited interfaces. Values are illustrative.
 The topology example is real output. Core gives nodes and links random
 `uuidv4()` ids, so `nsh` renumbers them `n1`..`nN` for nodes and `l1`..`lN`
 for links, in parse order, and rewrites each `link.target` to match. Every
-`link.source` is the literal `"local"` (`src/cli/nsh.ts:200-208`). The same
+`link.source` is the literal `"local"` (the topology lldp branch of `nsh.ts run()`). The same
 input always gives the same bytes. See Resolution 2.
 
 ### 3. Exit codes (FR-005)
@@ -168,7 +168,7 @@ The only files it reads are the ones named on the command line, and it writes
 only to stdout and stderr. SC-003 enforces part of this: zero `electron`
 imports under `src/core/` and `src/cli/`, checked by `npm test`.
 
-**Templates are trusted code.** nunjucks (`src/core/templates.ts:10-13`) is
+**Templates are trusted code.** nunjucks (`core/templates.ts renderTemplate`) is
 not a sandbox. A template file can reach JavaScript, for example with
 `range.constructor(...)()`, so it can read `process.env` and anything else the
 process can reach. The MUST NOT list above describes what `nsh` itself does;
@@ -202,7 +202,7 @@ the app.
   `NormalizedBgpPeer.prefixesSent` is never filled by the current parser.
   Making the types richer later is an additive `nsh/1` change.
 - Every `comply` result can repeat up to 500 characters of the config in
-  `output` (`src/core/compliance.ts:104`), because the app does this.
+  `output` (`core/compliance.ts evaluateCheck`), because the app does this.
   Output is noisy but identical to the app.
 
 ## Open questions
@@ -212,14 +212,14 @@ settled at GATE 1; the answers are recorded under Resolutions below.
 
 1. **Exit 3 vs. current parsers.** `parseInterfaces`, `parseBgp` and
    `parseArp` return `[]`, and `parseDevice` returns `{vendor}`, for text they
-   cannot read (`src/core/normalize.ts:9-155`). The spec requires exit 3.
+   cannot read (`core/normalize.ts parseInterfaces/parseBgp/parseArp/parseDevice`). The spec requires exit 3.
    Where does that check go: in the CLI (empty result → 3) or in core? And is
    a legitimately empty table (for example, a device with no BGP peers)
    exit 3 or exit 0?
 2. **Topology is not deterministic today.** `TOPOLOGY_LLDP_DISCOVER` gives
    every node and link a random `uuidv4()` id, and uses a caller-supplied
    `localNodeId` as each link's `source` (`src/main/ipc/topology.ts:33`,
-   `src/core/topology.ts:64-77`). This conflicts with the Edge Case on
+   `core/topology.ts parseLldpNeighbors`). This conflicts with the Edge Case on
    deterministic output and with SC-001. Options: derive ids from labels, add
    a `--local-node` flag (not in FR-003), or use a fixed `source`.
 3. **CDP fallback.** The app falls back to parsing CDP when the LLDP output
@@ -236,7 +236,7 @@ settled at GATE 1; the answers are recorded under Resolutions below.
    `compliance.ts`. Should `--policy` also accept a built-in id (such as
    `builtin-ios-cis`), or only a file path as assumed here?
 6. **Render errors.** `TEMPLATES_RENDER` returns `{ error }` for a nunjucks
-   failure (`src/core/templates.ts:33-34`). This ADR assumes that is exit 3
+   failure (`core/templates.ts renderTemplate`). This ADR assumes that is exit 3
    with the message on stderr. Confirm.
 7. **Positional file argument.** FR-003 says "input from a file argument or
    stdin" but gives a flag only for `comply` (`--config`). This ADR assumes a
@@ -248,27 +248,27 @@ What the code does for each open question above, by the same number.
 
 1. **Empty table → exit 3.** The CLI makes the check, not core. It treats a
    parser result of `[]` or a bare `{vendor}` as "nothing parsed" and exits 3
-   (`src/cli/nsh.ts:142-146`), so a device with no BGP peers also exits 3.
+   (the normalize branch of `nsh.ts run()`), so a device with no BGP peers also exits 3.
    Empty or whitespace-only input is exit 3 before any parser runs
-   (`src/cli/nsh.ts:120`). `topology lldp` with no neighbors is exit 3
-   (`src/cli/nsh.ts:201`).
+   (`nsh.ts deviceText`). `topology lldp` with no neighbors is exit 3
+   (the topology lldp branch of `nsh.ts run()`).
 2. **Fixed source, renumbered ids.** Every link's `source` is the fixed string
    `"local"`. Node ids are `n1`..`nN` and link ids `l1`..`lN` in parse order,
    and `link.target` is rewritten to the new node id
-   (`src/cli/nsh.ts:200-208`). There is no `--local-node` flag.
+   (the topology lldp branch of `nsh.ts run()`). There is no `--local-node` flag.
 3. **No CDP fallback.** `topology lldp` parses LLDP only
-   (`src/cli/nsh.ts:199-200`). CDP text finds no neighbors and exits 3.
+   (the topology lldp branch of `nsh.ts run()`, which calls only `parseLldpNeighbors`). CDP text finds no neighbors and exits 3.
 4. **`check.command` is ignored.** Every check's regex runs against the whole
-   `--config` text (`src/cli/nsh.ts:169-170`). Checks written for other show
+   `--config` text (the comply branch of `nsh.ts run()`). Checks written for other show
    commands (such as `show ntp status`) can give different results than in
    the app.
 5. **`--policy` is a file path only.** Its value is read as a JSON file
-   (`src/cli/nsh.ts:152-153`); built-in ids such as `builtin-ios-cis` are not
+   (`nsh.ts readJson`, called from the comply branch of `run()`); built-in ids such as `builtin-ios-cis` are not
    accepted. A path that does not exist is exit 2, per §3.
 6. **Render error → exit 3.** A nunjucks failure exits 3 with
    `render failed: <nunjucks message>` on stderr and empty stdout
-   (`src/cli/nsh.ts:191`).
+   (the render branch of `nsh.ts run()`).
 7. **Positional FILE.** `normalize` and `topology lldp` take one optional
    positional FILE; with no FILE they read stdin
-   (`src/cli/nsh.ts:119`, `:133`, `:196`). An extra positional is exit 2
-   (`src/cli/nsh.ts:123-125`, `:136`, `:198`).
+   (`nsh.ts deviceText`). An extra positional is exit 2
+   (`maxArgs` in the normalize and topology lldp branches of `nsh.ts run()`).

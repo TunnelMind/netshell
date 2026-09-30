@@ -264,3 +264,14 @@ test('real process: closed stdout (EPIPE) exits 0 quietly', () => withTmp(write 
   assert.strictEqual(r.status, 0, r.stderr)
   assert.strictEqual(r.stderr, '')
 }))
+
+test('real process: closed stdout (EPIPE) keeps comply failure exit 1', () => withTmp(write => {
+  // Each failing result carries up to 500 chars of config, so 4000 checks is well over 1 MB.
+  const checks = Array.from({ length: 4000 }, (_, i) => ({ id: `c${i}`, description: 'd', expectMatch: 'no-such-line' }))
+  const p = write('p.json', { checks })
+  const r = spawnSync('bash', ['-c',
+    `set -o pipefail; "${process.execPath}" --import tsx src/cli/nsh.ts comply --policy "${p}" --config "${fix('compliance', 'ios.txt')}" | head -c0`],
+  { cwd: ROOT, encoding: 'utf8' })
+  assert.strictEqual(r.status, 1, r.stderr)
+  assert.strictEqual(r.stderr, '')
+}))
