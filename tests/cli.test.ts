@@ -229,3 +229,38 @@ test('real process: require.main wires stdout, stderr and exit code', () => {
   assert.strictEqual(empty.stdout, '')
   assert.ok(empty.stderr.startsWith('nsh:'), empty.stderr)
 })
+
+test('unreadable stdin is exit 3 with one line, no stack trace', () => {
+  const r = main(['normalize', 'interfaces', '--vendor', 'ios'], () => {
+    throw Object.assign(new Error('EISDIR: illegal operation on a directory, read'), { code: 'EISDIR' })
+  })
+  assertExit(r, 3)
+  assert.ok(r.stderr.includes('stdin'), r.stderr)
+  assert.ok(!r.stderr.includes('\n    at '), r.stderr)
+})
+
+test('real process: stdin is a directory', () => {
+  const fd = fs.openSync(os.tmpdir(), 'r')
+  try {
+    const r = spawnSync(process.execPath, ['--import', 'tsx', 'src/cli/nsh.ts', 'normalize', 'interfaces', '--vendor', 'ios'],
+      { cwd: ROOT, stdio: [fd, 'pipe', 'pipe'], encoding: 'utf8' })
+    assert.strictEqual(r.status, 3, r.stderr)
+    assert.strictEqual(r.stdout, '')
+    assert.ok(r.stderr.startsWith('nsh:') && r.stderr.includes('stdin'), r.stderr)
+    assert.ok(!r.stderr.includes('    at '), r.stderr)
+  } finally {
+    fs.closeSync(fd)
+  }
+})
+
+test('real process: closed stdout (EPIPE) exits 0 quietly', () => withTmp(write => {
+  // Output must dwarf the pipe buffer (64 KB) or the write may finish before head closes.
+  const one = fs.readFileSync(fix('normalize', 'interfaces', 'ios.txt'), 'utf8')
+  const n = Math.ceil(1024 * 1024 / Buffer.byteLength(one))
+  const big = write('big.txt', one.endsWith('\n') ? one.repeat(n) : (one + '\n').repeat(n))
+  const r = spawnSync('bash', ['-c',
+    `set -o pipefail; "${process.execPath}" --import tsx src/cli/nsh.ts normalize interfaces --vendor ios < "${big}" | head -c0`],
+  { cwd: ROOT, encoding: 'utf8' })
+  assert.strictEqual(r.status, 0, r.stderr)
+  assert.strictEqual(r.stderr, '')
+}))

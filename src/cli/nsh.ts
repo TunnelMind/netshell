@@ -116,7 +116,16 @@ function run(argv: string[], readStdin: () => string): Result {
   // Device text from the named file, else all of stdin. Passed to core unchanged
   // (no CRLF stripping) so the result matches the app path byte for byte.
   const deviceText = (file: string | undefined, flag: string, expected: string): string => {
-    const text = file !== undefined ? readNamed(file, flag) : readStdin()
+    let text
+    if (file !== undefined) text = readNamed(file, flag)
+    else {
+      // stdin that cannot be read (a directory, EAGAIN on a non-blocking fd) is bad input: exit 3, no trace.
+      try {
+        text = readStdin()
+      } catch (e: unknown) {
+        throw bad(`cannot read stdin: ${(e as Error).message}`)
+      }
+    }
     if (!text.trim()) throw bad(`empty input: expected ${expected}`)
     return text
   }
@@ -210,6 +219,11 @@ function run(argv: string[], readStdin: () => string): Result {
 
 if (require.main === module) {
   const r = main(process.argv.slice(2))
+  // A closed reader (`nsh … | head`) is not an error: exit 0 quietly, the Unix EPIPE convention.
+  process.stdout.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EPIPE') process.exit(0)
+    throw err
+  })
   process.stdout.write(r.stdout)
   process.stderr.write(r.stderr)
   process.exitCode = r.code
