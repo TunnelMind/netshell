@@ -1,0 +1,43 @@
+{
+  "ios": [
+    {
+      "ip": "192.0.2.1",
+      "mac": "52:54:00:12:34:56",
+      "interface": "GigabitEthernet0/0"
+    },
+    {
+      "ip": "192.0.2.50",
+      "mac": "AA:BB:CC:DD:EE:FF",
+      "interface": "GigabitEthernet0/0",
+      "age": 12
+    },
+    {
+      "ip": "203.0.113.9",
+      "mac": "00:11:22:33:44:55",
+      "interface": "Vlan100",
+      "age": 3
+    }
+  ],
+  "nxos": [],
+  "junos": [],
+  "eos": [],
+  "ios-crlf": [
+    {
+      "ip": "192.0.2.1",
+      "mac": "52:54:00:12:34:56",
+      "interface": "GigabitEthernet0/0"
+    },
+    {
+      "ip": "192.0.2.50",
+      "mac": "AA:BB:CC:DD:EE:FF",
+      "interface": "GigabitEthernet0/0",
+      "age": 12
+    },
+    {
+      "ip": "203.0.113.9",
+      "mac": "00:11:22:33:44:55",
+      "interface": "Vlan100",
+      "age": 3
+    }
+  ]
+}

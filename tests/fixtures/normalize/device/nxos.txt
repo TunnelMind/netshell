@@ -1,0 +1,17 @@
+switch# show version
+Cisco Nexus Operating System (NX-OS) Software
+TAC support: http://www.cisco.com/tac
+
+Software
+  BIOS: version 07.69
+  NXOS: version 9.3(8)
+  NXOS image file is: bootflash:///nxos.9.3.8.bin
+
+Hardware
+  cisco Nexus9000 C93180YC-EX chassis
+  Intel(R) Xeon(R) CPU  @ 1.80GHz with 24632864 kB of memory.
+  Processor Board ID FDO20351234
+
+  Device name: leaf1
+  bootflash:   53298520 kB
+Kernel uptime is 12 day(s), 3 hour(s), 14 minute(s), 21 second(s)

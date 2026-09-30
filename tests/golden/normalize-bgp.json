@@ -1,0 +1,71 @@
+{
+  "ios": [
+    {
+      "neighborAddress": "192.0.2.6",
+      "asn": 64498,
+      "state": "(Admin)"
+    },
+    {
+      "neighborAddress": "198.51.100.9",
+      "asn": 64499,
+      "state": "Established",
+      "prefixesReceived": 4
+    },
+    {
+      "neighborAddress": "203.0.113.2",
+      "asn": 64500,
+      "state": "Established",
+      "prefixesReceived": 7,
+      "uptimeSeconds": 3723
+    }
+  ],
+  "nxos": [
+    {
+      "neighborAddress": "192.0.2.14",
+      "asn": 64502,
+      "state": "Active",
+      "uptimeSeconds": 312
+    },
+    {
+      "neighborAddress": "2001:db8::2",
+      "asn": 64503,
+      "state": "Established",
+      "prefixesReceived": 2
+    }
+  ],
+  "junos": [],
+  "eos": [
+    {
+      "neighborAddress": "192.0.2.25",
+      "asn": 64505,
+      "state": "Connect",
+      "uptimeSeconds": 130
+    },
+    {
+      "neighborAddress": "192.0.2.29",
+      "asn": 64506,
+      "state": "Established",
+      "prefixesReceived": 7
+    }
+  ],
+  "ios-crlf": [
+    {
+      "neighborAddress": "192.0.2.6",
+      "asn": 64498,
+      "state": "(Admin)"
+    },
+    {
+      "neighborAddress": "198.51.100.9",
+      "asn": 64499,
+      "state": "Established",
+      "prefixesReceived": 4
+    },
+    {
+      "neighborAddress": "203.0.113.2",
+      "asn": 64500,
+      "state": "Established",
+      "prefixesReceived": 7,
+      "uptimeSeconds": 3723
+    }
+  ]
+}

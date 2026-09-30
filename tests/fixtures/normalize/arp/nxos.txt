@@ -1,0 +1,10 @@
+switch# show ip arp
+
+Flags: * - Adjacencies learnt on non-active FHRP router
+       + - Adjacencies synced via CFSoE
+
+IP ARP Table for context default
+Total number of entries: 2
+Address         Age       MAC Address     Interface       Flags
+192.0.2.1       00:02:11  0022.bdf8.19ff  Ethernet1/1
+198.51.100.5    00:15:40  0022.bdf8.1a07  Vlan10

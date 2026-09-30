@@ -1,0 +1,5 @@
+user@router> show arp
+MAC Address       Address         Name                      Interface               Flags
+00:05:86:71:e2:01 192.0.2.1       192.0.2.1                 ge-0/0/0.0              none
+00:05:86:71:e2:02 198.51.100.2    router2.example.net       ge-0/0/1.0              none
+Total entries: 2

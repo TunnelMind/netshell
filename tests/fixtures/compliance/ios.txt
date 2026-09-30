@@ -1,0 +1,33 @@
+Building configuration...
+
+Current configuration : 1842 bytes
+!
+version 17.3
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname router1
+!
+enable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
+!
+aaa new-model
+aaa authentication login default group tacacs+ local
+!
+ip domain name example.com
+ip ssh version 2
+!
+ip http server
+ip http secure-server
+!
+logging host 192.0.2.100
+ntp server 192.0.2.123
+snmp-server community public RO
+!
+line con 0
+ exec-timeout 5 0
+line vty 0 4
+ exec-timeout 10 0
+ transport input telnet ssh
+!
+end

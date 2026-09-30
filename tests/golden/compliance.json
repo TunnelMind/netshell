@@ -1,0 +1,209 @@
+{
+  "builtin-ios-cis": [
+    {
+      "checkId": "ios-1",
+      "description": "SSH v2 enabled",
+      "severity": "critical",
+      "status": "fail",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-2",
+      "description": "Telnet disabled on VTYs",
+      "severity": "high",
+      "status": "fail",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm",
+      "remediation": "line vty 0 15\n transport input ssh"
+    },
+    {
+      "checkId": "ios-3",
+      "description": "VTY exec-timeout set",
+      "severity": "high",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-4",
+      "description": "Console exec-timeout set",
+      "severity": "medium",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-5",
+      "description": "Password encryption enabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-6",
+      "description": "Enable secret set (not enable password)",
+      "severity": "critical",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-7",
+      "description": "AAA new-model enabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-8",
+      "description": "NTP configured",
+      "severity": "medium",
+      "status": "fail",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm",
+      "remediation": "ntp server <ntp-server>"
+    },
+    {
+      "checkId": "ios-9",
+      "description": "Logging enabled",
+      "severity": "medium",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-10",
+      "description": "SNMP v3 only (not v1/v2c)",
+      "severity": "high",
+      "status": "fail",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm",
+      "remediation": "Remove snmp-server community, configure SNMP v3"
+    },
+    {
+      "checkId": "ios-11",
+      "description": "CDP disabled on external interfaces",
+      "severity": "low",
+      "status": "fail",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    },
+    {
+      "checkId": "ios-12",
+      "description": "HTTP server disabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "Building configuration...\n\nCurrent configuration : 1842 bytes\n!\nversion 17.3\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nservice password-encryption\n!\nhostname router1\n!\nenable secret 9 $9$abcdefghijklmn$ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq\n!\naaa new-model\naaa authentication login default group tacacs+ local\n!\nip domain name example.com\nip ssh version 2\n!\nip http server\nip http secure-server\n!\nlogging host 192.0.2.100\nntp server 192.0.2.123\nsnmp-server comm"
+    }
+  ],
+  "builtin-nxos-cis": [
+    {
+      "checkId": "nx-1",
+      "description": "SSH enabled",
+      "severity": "critical",
+      "status": "fail",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    },
+    {
+      "checkId": "nx-2",
+      "description": "Telnet disabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    },
+    {
+      "checkId": "nx-3",
+      "description": "NTP configured",
+      "severity": "medium",
+      "status": "fail",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    },
+    {
+      "checkId": "nx-4",
+      "description": "AAA configured",
+      "severity": "high",
+      "status": "pass",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    },
+    {
+      "checkId": "nx-5",
+      "description": "SNMP v3 configured",
+      "severity": "high",
+      "status": "pass",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    },
+    {
+      "checkId": "nx-6",
+      "description": "Password strength check enabled",
+      "severity": "medium",
+      "status": "pass",
+      "output": "!Command: show running-config\n!Time: Mon Jan 10 12:00:00 2022\n\nversion 9.3(8) Bios:version 07.69\nhostname leaf1\nfeature ssh\nfeature telnet\nfeature tacacs+\n\npassword strength-check\nusername admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin\nssh key rsa 2048\naaa authentication login default group TACACS\nsnmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey\nntp server 192.0.2.123 use-vrf management\n\nint"
+    }
+  ],
+  "builtin-junos-cis": [
+    {
+      "checkId": "ju-1",
+      "description": "SSH enabled",
+      "severity": "critical",
+      "status": "pass",
+      "output": "## Last commit: 2022-01-10 12:00:00 UTC by admin\nversion 21.4R3-S1.4;\nsystem {\n    host-name router1;\n    services {\n        ssh {\n            protocol-version v2;\n        }\n        netconf {\n            ssh;\n        }\n    }\n    syslog {\n        host 192.0.2.100 {\n            any notice;\n        }\n    }\n    ntp {\n        server 192.0.2.123;\n    }\n}\n"
+    },
+    {
+      "checkId": "ju-2",
+      "description": "Telnet disabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "## Last commit: 2022-01-10 12:00:00 UTC by admin\nversion 21.4R3-S1.4;\nsystem {\n    host-name router1;\n    services {\n        ssh {\n            protocol-version v2;\n        }\n        netconf {\n            ssh;\n        }\n    }\n    syslog {\n        host 192.0.2.100 {\n            any notice;\n        }\n    }\n    ntp {\n        server 192.0.2.123;\n    }\n}\n"
+    },
+    {
+      "checkId": "ju-3",
+      "description": "NTP servers configured",
+      "severity": "medium",
+      "status": "fail",
+      "output": "## Last commit: 2022-01-10 12:00:00 UTC by admin\nversion 21.4R3-S1.4;\nsystem {\n    host-name router1;\n    services {\n        ssh {\n            protocol-version v2;\n        }\n        netconf {\n            ssh;\n        }\n    }\n    syslog {\n        host 192.0.2.100 {\n            any notice;\n        }\n    }\n    ntp {\n        server 192.0.2.123;\n    }\n}\n"
+    },
+    {
+      "checkId": "ju-4",
+      "description": "RADIUS/TACACS authentication",
+      "severity": "high",
+      "status": "pass",
+      "output": "## Last commit: 2022-01-10 12:00:00 UTC by admin\nversion 21.4R3-S1.4;\nsystem {\n    host-name router1;\n    services {\n        ssh {\n            protocol-version v2;\n        }\n        netconf {\n            ssh;\n        }\n    }\n    syslog {\n        host 192.0.2.100 {\n            any notice;\n        }\n    }\n    ntp {\n        server 192.0.2.123;\n    }\n}\n"
+    },
+    {
+      "checkId": "ju-5",
+      "description": "Syslog configured",
+      "severity": "medium",
+      "status": "pass",
+      "output": "## Last commit: 2022-01-10 12:00:00 UTC by admin\nversion 21.4R3-S1.4;\nsystem {\n    host-name router1;\n    services {\n        ssh {\n            protocol-version v2;\n        }\n        netconf {\n            ssh;\n        }\n    }\n    syslog {\n        host 192.0.2.100 {\n            any notice;\n        }\n    }\n    ntp {\n        server 192.0.2.123;\n    }\n}\n"
+    }
+  ],
+  "builtin-eos-cis": [
+    {
+      "checkId": "eos-1",
+      "description": "SSH enabled",
+      "severity": "critical",
+      "status": "fail",
+      "output": "! Command: show running-config\n! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)\n!\nhostname switch1\n!\naaa authentication login default group tacacs+ local\ntacacs-server host 192.0.2.49 key 7 070E33455D1D18\n!\nntp server 192.0.2.123\n!\nmanagement api http-commands\n   no shutdown\n!\nmanagement ssh\n   idle-timeout 15\n!\nmanagement telnet\n   shutdown\n!\nend\n"
+    },
+    {
+      "checkId": "eos-2",
+      "description": "Telnet disabled",
+      "severity": "high",
+      "status": "fail",
+      "output": "! Command: show running-config\n! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)\n!\nhostname switch1\n!\naaa authentication login default group tacacs+ local\ntacacs-server host 192.0.2.49 key 7 070E33455D1D18\n!\nntp server 192.0.2.123\n!\nmanagement api http-commands\n   no shutdown\n!\nmanagement ssh\n   idle-timeout 15\n!\nmanagement telnet\n   shutdown\n!\nend\n"
+    },
+    {
+      "checkId": "eos-3",
+      "description": "AAA configured",
+      "severity": "high",
+      "status": "pass",
+      "output": "! Command: show running-config\n! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)\n!\nhostname switch1\n!\naaa authentication login default group tacacs+ local\ntacacs-server host 192.0.2.49 key 7 070E33455D1D18\n!\nntp server 192.0.2.123\n!\nmanagement api http-commands\n   no shutdown\n!\nmanagement ssh\n   idle-timeout 15\n!\nmanagement telnet\n   shutdown\n!\nend\n"
+    },
+    {
+      "checkId": "eos-4",
+      "description": "NTP configured",
+      "severity": "medium",
+      "status": "fail",
+      "output": "! Command: show running-config\n! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)\n!\nhostname switch1\n!\naaa authentication login default group tacacs+ local\ntacacs-server host 192.0.2.49 key 7 070E33455D1D18\n!\nntp server 192.0.2.123\n!\nmanagement api http-commands\n   no shutdown\n!\nmanagement ssh\n   idle-timeout 15\n!\nmanagement telnet\n   shutdown\n!\nend\n"
+    },
+    {
+      "checkId": "eos-5",
+      "description": "IP HTTP server disabled",
+      "severity": "high",
+      "status": "pass",
+      "output": "! Command: show running-config\n! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)\n!\nhostname switch1\n!\naaa authentication login default group tacacs+ local\ntacacs-server host 192.0.2.49 key 7 070E33455D1D18\n!\nntp server 192.0.2.123\n!\nmanagement api http-commands\n   no shutdown\n!\nmanagement ssh\n   idle-timeout 15\n!\nmanagement telnet\n   shutdown\n!\nend\n"
+    }
+  ]
+}

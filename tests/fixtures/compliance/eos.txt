@@ -1,0 +1,20 @@
+! Command: show running-config
+! device: switch1 (DCS-7050TX-64, EOS-4.28.3M)
+!
+hostname switch1
+!
+aaa authentication login default group tacacs+ local
+tacacs-server host 192.0.2.49 key 7 070E33455D1D18
+!
+ntp server 192.0.2.123
+!
+management api http-commands
+   no shutdown
+!
+management ssh
+   idle-timeout 15
+!
+management telnet
+   shutdown
+!
+end

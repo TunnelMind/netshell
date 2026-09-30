@@ -166,7 +166,7 @@ export function registerComplianceHandlers(): void {
   })
 }
 
-function evaluateCheck(check: ComplianceCheck, output: string): ComplianceResult {
+export function evaluateCheck(check: ComplianceCheck, output: string): ComplianceResult {
   let status: 'pass' | 'fail' = 'pass'
 
   if (check.expectMatch) {

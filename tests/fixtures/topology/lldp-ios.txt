@@ -1,0 +1,38 @@
+Router#show lldp neighbors detail
+------------------------------------------------
+Local Intf: Gi0/0
+Chassis id: 5254.0012.aaaa
+Port id: Gi0/1
+Port Description: GigabitEthernet0/1
+System Name: core1.example.com
+
+System Description:
+Cisco IOS Software, IOSv Software (VIOS-ADVENTERPRISEK9-M), Version 15.6(2)T
+
+Time remaining: 102 seconds
+System Capabilities: B,R
+Enabled Capabilities: R
+Management Addresses:
+    IP: 192.0.2.2
+Auto Negotiation - not supported
+------------------------------------------------
+Local Intf: Gi0/2
+Chassis id: 001c.7300.0001
+Port id: Ethernet1
+Port Description: to-router1
+System Name: leaf1
+
+Time remaining: 95 seconds
+System Capabilities: Bridge, Router
+Enabled Capabilities: Bridge
+Management Address: 198.51.100.20
+------------------------------------------------
+Local Intf: Gi0/3
+Chassis id: 0050.56aa.bbcc
+Port id: 0050.56aa.bbcc
+System Name: web01
+
+System Capabilities: Station Only
+------------------------------------------------
+
+Total entries displayed: 3

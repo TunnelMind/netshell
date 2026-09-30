@@ -1,0 +1,11 @@
+Router#show ip bgp summary
+BGP router identifier 192.0.2.1, local AS number 64496
+BGP table version is 5, main routing table version 5
+3 network entries using 432 bytes of memory
+3 path entries using 240 bytes of memory
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+192.0.2.2       4        64497      25      27        5    0    0 00:18:31        3
+192.0.2.6       4        64498       0       0        1    0    0 never    Idle (Admin)
+198.51.100.9    4        64499      10      12        5    0    0 1d02h           4
+203.0.113.2     4        64500     101     104        5    0    0 01:02:03        7

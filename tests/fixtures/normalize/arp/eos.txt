@@ -1,0 +1,4 @@
+switch#show ip arp
+Address         Age (sec)  Hardware Addr   Interface
+192.0.2.1         0:01:12  001c.7301.0001  Ethernet1, not learned
+198.51.100.30     0:00:45  001c.7301.0002  Vlan20, Ethernet5

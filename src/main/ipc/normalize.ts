@@ -50,7 +50,7 @@ export function registerNormalizeHandlers(): void {
 
 // ─── Interface parsers ────────────────────────────────────────────────────────
 
-function parseInterfaces(output: string, vendor: Vendor): NormalizedInterface[] {
+export function parseInterfaces(output: string, vendor: Vendor): NormalizedInterface[] {
   const results: NormalizedInterface[] = []
 
   if (vendor === 'junos') {
@@ -106,7 +106,7 @@ function parseInterfaces(output: string, vendor: Vendor): NormalizedInterface[] 
 
 // ─── BGP parsers ──────────────────────────────────────────────────────────────
 
-function parseBgp(output: string, _vendor: Vendor): NormalizedBgpPeer[] {
+export function parseBgp(output: string, _vendor: Vendor): NormalizedBgpPeer[] {
   const results: NormalizedBgpPeer[] = []
   // IOS/NXOS/EOS "show bgp summary" table format:
   // Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
@@ -141,7 +141,7 @@ function parseBgp(output: string, _vendor: Vendor): NormalizedBgpPeer[] {
 
 // ─── ARP parsers ──────────────────────────────────────────────────────────────
 
-function parseArp(output: string, vendor: Vendor): NormalizedArpEntry[] {
+export function parseArp(output: string, vendor: Vendor): NormalizedArpEntry[] {
   const results: NormalizedArpEntry[] = []
 
   if (vendor === 'junos') {
@@ -169,7 +169,7 @@ function parseArp(output: string, vendor: Vendor): NormalizedArpEntry[] {
 
 // ─── Device info parser ───────────────────────────────────────────────────────
 
-function parseDevice(output: string, vendor: Vendor): NormalizedDeviceInfo {
+export function parseDevice(output: string, vendor: Vendor): NormalizedDeviceInfo {
   const info: NormalizedDeviceInfo = { vendor }
 
   if (vendor === 'junos') {
