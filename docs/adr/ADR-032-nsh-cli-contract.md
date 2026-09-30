@@ -7,9 +7,10 @@
 ## Context
 
 NetShell already has parsers for vendor `show` output, a compliance evaluator,
-a template renderer and an LLDP/CDP parser. They live inside Electron IPC
-handlers (`src/main/ipc/{normalize,compliance,templates,topology}.ts`), so
-nothing outside the app can use them.
+a template renderer and an LLDP/CDP parser. Before this work they lived inside
+Electron IPC handlers (`src/main/ipc/{normalize,compliance,templates,topology}.ts`),
+so nothing outside the app could use them. They now live in
+`src/core/{normalize,compliance,templates,topology}.ts`.
 
 We want Claude, crew agents, Josh's shell, cron and CI to use them. We chose a
 CLI over an MCP server (spec, Input): a CLI costs no context until it runs,
@@ -43,7 +44,7 @@ nsh topology  lldp                                      [FILE | stdin]
   (`src/types.ts:136`).
 - `--vars V` is a path to a JSON object of variable name → string, number or
   boolean. This is the same shape as the `variables` parameter of the
-  `TEMPLATES_RENDER` handler (`src/main/ipc/templates.ts:39`).
+  `TEMPLATES_RENDER` handler (`src/main/ipc/templates.ts:33-35`).
 - Arguments are parsed with `node:util` `parseArgs` (plan.md). No new runtime
   dependency.
 
@@ -81,8 +82,8 @@ a newline:
 | `normalize arp` | `NormalizedArpEntry[]` (`src/types.ts:260`) |
 | `normalize device` | `NormalizedDeviceInfo` (`src/types.ts:267`), one object |
 | `comply` | `ComplianceResult[]` (`src/types.ts:176`), one per check in policy order |
-| `render` | `{ "rendered": string }`, the success value of `TEMPLATES_RENDER` (`src/main/ipc/templates.ts:57`) |
-| `topology lldp` | `{ "nodes": TopologyNode[], "links": TopologyLink[] }` (`src/types.ts:219`, `:228`), the value of `TOPOLOGY_LLDP_DISCOVER` (`src/main/ipc/topology.ts:106`) |
+| `render` | `{ "rendered": string }`, the success value of `TEMPLATES_RENDER` (`src/core/templates.ts:32`) |
+| `topology lldp` | `{ "nodes": TopologyNode[], "links": TopologyLink[] }` (`src/types.ts:219`, `:228`), the value of `TOPOLOGY_LLDP_DISCOVER` (`src/main/ipc/topology.ts:30`) |
 
 **Why `ComplianceResult[]` and not `ComplianceScanResult`** (`src/types.ts:185`):
 the scan result carries `sessionId`, `sessionName` and `ts: Date.now()`. `nsh`
@@ -201,7 +202,7 @@ the app.
   `NormalizedBgpPeer.prefixesSent` is never filled by the current parser.
   Making the types richer later is an additive `nsh/1` change.
 - Every `comply` result can repeat up to 500 characters of the config in
-  `output` (`src/main/ipc/compliance.ts:194`), because the app does this.
+  `output` (`src/core/compliance.ts:104`), because the app does this.
   Output is noisy but identical to the app.
 
 ## Open questions
@@ -211,22 +212,22 @@ settled at GATE 1; the answers are recorded under Resolutions below.
 
 1. **Exit 3 vs. current parsers.** `parseInterfaces`, `parseBgp` and
    `parseArp` return `[]`, and `parseDevice` returns `{vendor}`, for text they
-   cannot read (`src/main/ipc/normalize.ts:53-199`). The spec requires exit 3.
+   cannot read (`src/core/normalize.ts:9-155`). The spec requires exit 3.
    Where does that check go: in the CLI (empty result → 3) or in core? And is
    a legitimately empty table (for example, a device with no BGP peers)
    exit 3 or exit 0?
 2. **Topology is not deterministic today.** `TOPOLOGY_LLDP_DISCOVER` gives
    every node and link a random `uuidv4()` id, and uses a caller-supplied
    `localNodeId` as each link's `source` (`src/main/ipc/topology.ts:33`,
-   `:89-98`). This conflicts with the Edge Case on deterministic output and
-   with SC-001. Options: derive ids from labels, add a `--local-node` flag
-   (not in FR-003), or use a fixed `source`.
+   `src/core/topology.ts:64-77`). This conflicts with the Edge Case on
+   deterministic output and with SC-001. Options: derive ids from labels, add
+   a `--local-node` flag (not in FR-003), or use a fixed `source`.
 3. **CDP fallback.** The app falls back to parsing CDP when the LLDP output
    is shorter than 20 characters (`src/main/ipc/topology.ts:37`). FR-003 names
    only `topology lldp`. Should `nsh` accept CDP text under the same command
    or reject it?
 4. **One config vs. per-check commands.** In the app, each `ComplianceCheck`
-   runs its own `command` on the device (`src/main/ipc/compliance.ts:129`).
+   runs its own `command` on the device (`src/main/ipc/compliance.ts:58`).
    `nsh comply` has one text (the running-config), so this ADR assumes every
    check's regex is evaluated against that whole text and `command` is
    ignored. Checks written for other commands (such as `show ntp status`)
@@ -235,7 +236,7 @@ settled at GATE 1; the answers are recorded under Resolutions below.
    `compliance.ts`. Should `--policy` also accept a built-in id (such as
    `builtin-ios-cis`), or only a file path as assumed here?
 6. **Render errors.** `TEMPLATES_RENDER` returns `{ error }` for a nunjucks
-   failure (`src/main/ipc/templates.ts:59`). This ADR assumes that is exit 3
+   failure (`src/core/templates.ts:33-34`). This ADR assumes that is exit 3
    with the message on stderr. Confirm.
 7. **Positional file argument.** FR-003 says "input from a file argument or
    stdin" but gives a flag only for `comply` (`--config`). This ADR assumes a
