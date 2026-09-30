@@ -1,0 +1,8 @@
+switch#show ip bgp summary
+BGP summary information for VRF default
+Router identifier 192.0.2.1, local AS number 64496
+Neighbor Status Codes: m - Under maintenance
+  Neighbor         V  AS           MsgRcvd   MsgSent  InQ OutQ  Up/Down State   PfxRcd PfxAcc
+  192.0.2.21       4  64504           1257      1263    0    0 17:48:16 Estab   12     12
+  192.0.2.25       4  64505              0         0    0    0 00:02:10 Connect
+  192.0.2.29       4  64506            800       790    0    0    1d03h Estab   7      7

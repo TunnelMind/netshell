@@ -1,0 +1,133 @@
+{
+  "ios": [
+    {
+      "name": "GigabitEthernet0/0",
+      "status": "up",
+      "description": "Link to ISP",
+      "mtu": 1500,
+      "ipv4": "192.0.2.1/24",
+      "errorIn": 3,
+      "errorOut": 0,
+      "speedMbps": 1000
+    },
+    {
+      "name": "GigabitEthernet0/1",
+      "status": "down",
+      "mtu": 1500,
+      "errorIn": 0,
+      "errorOut": 0,
+      "speedMbps": 1000
+    },
+    {
+      "name": "GigabitEthernet0/2",
+      "status": "up",
+      "mtu": 1500,
+      "speedMbps": 100
+    },
+    {
+      "name": "Loopback0",
+      "status": "up",
+      "mtu": 1514,
+      "ipv4": "198.51.100.1/32",
+      "speedMbps": 8000
+    }
+  ],
+  "nxos": [
+    {
+      "name": "Vlan10",
+      "status": "up",
+      "description": "servers",
+      "mtu": 1500,
+      "ipv4": "198.51.100.1/24",
+      "speedMbps": 1000
+    }
+  ],
+  "junos": [
+    {
+      "name": "ge-0/0/0",
+      "status": "up"
+    },
+    {
+      "name": "ge-0/0/0.0",
+      "status": "up"
+    },
+    {
+      "name": "ge-0/0/1",
+      "status": "down"
+    },
+    {
+      "name": "ge-0/0/2",
+      "status": "admin-down"
+    },
+    {
+      "name": "ge-0/0/2.0",
+      "status": "admin-down"
+    },
+    {
+      "name": "lo0",
+      "status": "up"
+    },
+    {
+      "name": "lo0.0",
+      "status": "up"
+    }
+  ],
+  "eos": [
+    {
+      "name": "Ethernet1",
+      "status": "up",
+      "description": "to-leaf2",
+      "mtu": 1500,
+      "ipv4": "192.0.2.0/31",
+      "errorIn": 2,
+      "errorOut": 0,
+      "speedMbps": 10000
+    },
+    {
+      "name": "Ethernet2",
+      "status": "down",
+      "mtu": 9214,
+      "speedMbps": 1000
+    },
+    {
+      "name": "Management1",
+      "status": "up",
+      "mtu": 1500,
+      "ipv4": "198.51.100.20/24",
+      "speedMbps": 1000
+    }
+  ],
+  "ios-crlf": [
+    {
+      "name": "GigabitEthernet0/0",
+      "status": "up",
+      "description": "Link to ISP",
+      "mtu": 1500,
+      "ipv4": "192.0.2.1/24",
+      "errorIn": 3,
+      "errorOut": 0,
+      "speedMbps": 1000
+    },
+    {
+      "name": "GigabitEthernet0/1",
+      "status": "down",
+      "mtu": 1500,
+      "errorIn": 0,
+      "errorOut": 0,
+      "speedMbps": 1000
+    },
+    {
+      "name": "GigabitEthernet0/2",
+      "status": "up",
+      "mtu": 1500,
+      "speedMbps": 100
+    },
+    {
+      "name": "Loopback0",
+      "status": "up",
+      "mtu": 1514,
+      "ipv4": "198.51.100.1/32",
+      "speedMbps": 8000
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+## Last commit: 2022-01-10 12:00:00 UTC by admin
+version 21.4R3-S1.4;
+system {
+    host-name router1;
+    services {
+        ssh {
+            protocol-version v2;
+        }
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        host 192.0.2.100 {
+            any notice;
+        }
+    }
+    ntp {
+        server 192.0.2.123;
+    }
+}

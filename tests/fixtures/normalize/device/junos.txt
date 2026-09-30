@@ -1,0 +1,7 @@
+user@router> show version
+Hostname: router1
+Model: mx480
+Junos: 21.4R3-S1.4
+JUNOS OS Kernel 64-bit  [20220722.5ab5b3b_builder_stable_12_214]
+JUNOS OS libs [20220722.5ab5b3b_builder_stable_12_214]
+JUNOS Routing Software Suite [21.4R3-S1.4]

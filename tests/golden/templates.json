@@ -1,0 +1,20 @@
+{
+  "defaults-only": {
+    "rendered": "interface GigabitEthernet0/1\n description uplink\n ip address  255.255.255.0\n no shutdown\n"
+  },
+  "caller-override": {
+    "rendered": "interface Vlan100\n description uplink\n ip address 192.0.2.1 255.255.255.0\n shutdown\n ip access-group MGMT-IN in\n"
+  },
+  "undeclared-key-and-raw-chars": {
+    "rendered": "interface GigabitEthernet0/1\n description <to core & edge>\n ip address  255.255.255.0\n no shutdown\n ip access-group A\"B in\n"
+  },
+  "syntax-error": {
+    "error": "(unknown path) [Line 1, Column 22]\n  expected variable end"
+  },
+  "include-no-loader": {
+    "error": "(unknown path)\n  Template render error: (unknown path)\n  Error: template not found: base.j2"
+  },
+  "not-found": {
+    "error": "Template no-such-template not found"
+  }
+}

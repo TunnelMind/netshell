@@ -1,0 +1,19 @@
+!Command: show running-config
+!Time: Mon Jan 10 12:00:00 2022
+
+version 9.3(8) Bios:version 07.69
+hostname leaf1
+feature ssh
+feature telnet
+feature tacacs+
+
+password strength-check
+username admin password 5 $5$ABCDEFGH$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG role network-admin
+ssh key rsa 2048
+aaa authentication login default group TACACS
+snmp-server user admin network-admin auth sha 0x0123456789abcdef priv aes-128 0x0123456789abcdef localizedkey
+ntp server 192.0.2.123 use-vrf management
+
+interface mgmt0
+  vrf member management
+  ip address 192.0.2.10/24

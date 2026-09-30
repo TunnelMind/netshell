@@ -1,0 +1,35 @@
+[
+  {
+    "id": "tmpl-intf",
+    "name": "IOS access interface",
+    "vendor": "ios",
+    "description": "Interface stanza in the style of the Ansible Jinja2 examples",
+    "template": "interface {{ intf }}\n description {{ desc }}\n ip address {{ ip }} {{ mask }}\n{% if shutdown %} shutdown\n{% else %} no shutdown\n{% endif %}{% if acl %} ip access-group {{ acl }} in\n{% endif %}",
+    "variables": [
+      { "name": "intf", "label": "Interface", "type": "string", "default": "GigabitEthernet0/1", "required": true },
+      { "name": "desc", "label": "Description", "type": "string", "default": "uplink", "required": false },
+      { "name": "ip", "label": "IP address", "type": "string", "required": true },
+      { "name": "mask", "label": "Mask", "type": "string", "default": "255.255.255.0", "required": false },
+      { "name": "shutdown", "label": "Shutdown", "type": "boolean", "required": false }
+    ],
+    "tags": ["ios", "interface"]
+  },
+  {
+    "id": "tmpl-syntax-error",
+    "name": "Broken tag",
+    "vendor": "ios",
+    "description": "Unclosed variable tag: nunjucks throws at render",
+    "template": "hostname {{ hostname }\n",
+    "variables": [{ "name": "hostname", "label": "Hostname", "type": "string", "default": "r1", "required": true }],
+    "tags": []
+  },
+  {
+    "id": "tmpl-include",
+    "name": "Include with no loader",
+    "vendor": "eos",
+    "description": "include fails because the Environment has a null loader (INVENTORY T3)",
+    "template": "{% include \"base.j2\" %}\nhostname {{ hostname }}\n",
+    "variables": [],
+    "tags": []
+  }
+]

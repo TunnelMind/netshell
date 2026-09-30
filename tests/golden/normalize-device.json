@@ -1,0 +1,37 @@
+{
+  "ios": {
+    "vendor": "ios",
+    "hostname": "router1",
+    "version": "Cisco",
+    "model": "IOS",
+    "serialNumber": "FDO21520TGH",
+    "uptime": "2 weeks, 3 days, 4 hours, 5 minutes"
+  },
+  "nxos": {
+    "vendor": "nxos",
+    "hostname": "Kernel",
+    "version": "Cisco",
+    "model": "Nexus",
+    "serialNumber": "FDO20351234",
+    "uptime": "12 day(s), 3 hour(s), 14 minute(s), 21 second(s)"
+  },
+  "junos": {
+    "vendor": "junos",
+    "hostname": "router1",
+    "model": "mx480",
+    "version": "21.4R3-S1.4"
+  },
+  "eos": {
+    "vendor": "eos",
+    "version": "Arista",
+    "model": "DCS-7050TX-64-R"
+  },
+  "ios-crlf": {
+    "vendor": "ios",
+    "hostname": "router1",
+    "version": "Cisco",
+    "model": "IOS",
+    "serialNumber": "FDO21520TGH",
+    "uptime": "2 weeks, 3 days, 4 hours, 5 minutes"
+  }
+}
