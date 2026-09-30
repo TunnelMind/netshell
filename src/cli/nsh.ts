@@ -154,6 +154,17 @@ function run(argv: string[], readStdin: () => string): Result {
     if (!isObject(policy) || !Array.isArray(policy.checks)) {
       throw bad(`--policy ${values.policy}: expected a CompliancePolicy object with a "checks" array`)
     }
+    // Shape-check only the fields core reads, so a bad check is exit 3, not a TypeError (exit 1 = failures).
+    policy.checks.forEach((c: unknown, i: number) => {
+      const at = `--policy ${values.policy}: checks[${i}]`
+      if (!isObject(c)) throw bad(`${at} must be an object`)
+      for (const k of ['id', 'description']) {
+        if (typeof c[k] !== 'string') throw bad(`${at}.${k} must be a string`)
+      }
+      for (const k of ['expectMatch', 'expectNoMatch']) {
+        if (c[k] !== undefined && typeof c[k] !== 'string') throw bad(`${at}.${k} must be a string`)
+      }
+    })
     const text = deviceText(values.config, '--config', 'a running-config')
     // Every check runs against the whole config; check.command is ignored (ADR-032 open question 4).
     const data = (policy as unknown as CompliancePolicy).checks.map(c => evaluateCheck(c, text))
@@ -169,6 +180,11 @@ function run(argv: string[], readStdin: () => string): Result {
     if (!isObject(tmpl) || typeof tmpl.template !== 'string' || !Array.isArray(tmpl.variables)) {
       throw bad(`--template ${values.template}: expected a ConfigTemplate with a string "template" and a "variables" array`)
     }
+    tmpl.variables.forEach((v: unknown, i: number) => {
+      const at = `--template ${values.template}: variables[${i}]`
+      if (!isObject(v)) throw bad(`${at} must be an object`)
+      if (typeof v.name !== 'string') throw bad(`${at}.name must be a string`)
+    })
     if (!isObject(vars)) throw bad(`--vars ${values.vars}: expected a JSON object of variable values`)
     const t = tmpl as unknown as ConfigTemplate
     const out = renderTemplate(t, t.id ?? '', vars as Record<string, string | number | boolean>)

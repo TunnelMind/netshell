@@ -167,6 +167,38 @@ test('unparseable input exits 3 with empty stdout', async (t) => {
     const p = write('bad.json', '{ not json')
     assertExit(main(['comply', '--policy', p, '--config', fix('compliance', 'ios.txt')], noStdin), 3)
   }))
+  // R001: malformed checks/variables are exit 3 naming the field, never a TypeError.
+  const check = { id: 'x', description: 'd' }
+  const badPolicies: [string, unknown, string][] = [
+    ['checks:[null]', { checks: [null] }, 'checks[0] must be an object'],
+    ['numeric check id', { checks: [check, { ...check, id: 1 }] }, 'checks[1].id'],
+    ['numeric description', { checks: [{ ...check, description: 2 }] }, 'checks[0].description'],
+    ['numeric expectMatch', { checks: [{ ...check, expectMatch: 5 }] }, 'checks[0].expectMatch'],
+    ['object expectNoMatch', { checks: [{ ...check, expectNoMatch: {} }] }, 'checks[0].expectNoMatch'],
+  ]
+  for (const [name, policy, field] of badPolicies) {
+    await t.test(name, () => withTmp(write => {
+      const r = main(['comply', '--policy', write('p.json', policy), '--config', fix('compliance', 'ios.txt')], noStdin)
+      assertExit(r, 3)
+      assert.ok(r.stderr.includes(field), r.stderr)
+    }))
+  }
+  const badTemplates: [string, unknown, string][] = [
+    ['variables:[null]', [null], 'variables[0] must be an object'],
+    ['numeric variable name', [{ name: 7 }], 'variables[0].name'],
+  ]
+  for (const [name, variables, field] of badTemplates) {
+    await t.test(name, () => withTmp(write => {
+      const r = main(['render', '--template', write('t.json', { template: 'x', variables }), '--vars', write('v.json', {})], noStdin)
+      assertExit(r, 3)
+      assert.ok(r.stderr.includes(field), r.stderr)
+    }))
+  }
+  await t.test('check with neither expectMatch nor expectNoMatch still passes', () => withTmp(write => {
+    const r = main(['comply', '--policy', write('p.json', { checks: [check] }), '--config', fix('compliance', 'ios.txt')], noStdin)
+    assert.strictEqual(r.code, 0, r.stderr)
+    assert.strictEqual(JSON.parse(r.stdout).data[0].status, 'pass')
+  }))
 })
 
 // Smoke bound only; SC-002 timing evidence is T204's.
