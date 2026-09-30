@@ -5,6 +5,9 @@
   "description": "SSH/Telnet/Serial terminal for network engineers — multi-tab sessions, credential vault, broadcast, compliance scanning, AI assistant, topology discovery, and 7 connection types.",
   "main": ".webpack/main",
   "private": true,
+  "bin": {
+    "nsh": "dist-cli/nsh.js"
+  },
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -13,7 +16,8 @@
     "lint": "eslint --ext .ts,.tsx .",
     "postinstall": "electron-rebuild",
     "test": "node --import tsx --test tests/*.test.ts",
-    "golden": "node --import tsx tests/capture-golden.ts"
+    "golden": "node --import tsx tests/capture-golden.ts",
+    "build:cli": "esbuild src/cli/nsh.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist-cli/nsh.js --banner:js='#!/usr/bin/env node' && chmod +x dist-cli/nsh.js"
   },
   "keywords": [],
   "author": {
@@ -47,6 +51,7 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "css-loader": "^6.11.0",
     "electron": "41.2.0",
+    "esbuild": "0.28.2",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",

@@ -3,3 +3,4 @@ out/
 .webpack/
 *.log
 netshell-license.json
+dist-cli/
