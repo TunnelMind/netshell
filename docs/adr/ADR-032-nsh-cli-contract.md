@@ -1,6 +1,6 @@
 # ADR-032: nsh CLI contract
 
-**Status: Proposed** (Josh decides at GATE 1)
+**Status: Accepted** — Josh in chat, 2026-09-29 ~21:45: "I also accept your builds" (GATE 1, spec 096)
 **Date**: 2026-09-29
 **Spec**: tunnelmind-spec `specs/096-netshell-cli/spec.md` (plan: `specs/096-netshell-cli/plan.md`)
 
