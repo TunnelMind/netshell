@@ -83,5 +83,5 @@ time node dist-cli/nsh.js normalize interfaces --vendor ios /tmp/nsh-sc002.txt >
 
 - The dependency audit lives in [docs/security/2026-10-02-deps.md](docs/security/2026-10-02-deps.md).
 - Fixed on 2026-10-02 by in-range updates: both critical Dependabot alerts (shell-quote 1.12.0, websocket-driver 0.7.5) and the runtime gRPC dependency protobufjs (7.6.6).
-- Still pending: the Electron update (41.2.0, 18 advisories; task N003). Electron ships inside the packaged app.
-- The other open alerts, including one critical (tar 6.2.1), are in build tooling (@electron-forge 7.x). They are not part of the shipped app. Fixing them needs Forge 8.
+- Electron was updated from 41.2.0 to 41.10.7 on 2026-10-02. Electron ships inside the packaged app.
+- Most open alerts, including one critical (tar 6.2.1), are in build tooling (@electron-forge 7.x); fixing them needs Forge 8. One is on the runtime path: braces, through nunjucks → chokidar.
