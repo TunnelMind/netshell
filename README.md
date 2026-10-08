@@ -1,5 +1,16 @@
 # NetShell
 
+## Status
+
+<!-- DRAFT for Josh: he rewrites public prose -->
+
+**DRAFT for Josh.**
+
+- The desktop app is no longer sold or supported.
+- `nsh`, the command-line tool below, is the maintained surface.
+- The license server was never deployed; its repo is being archived.
+- Existing installs keep working: the license gate is unchanged.
+
 ## nsh
 
 `nsh` is NetShell's parsers on the command line: text in, JSON out, no network.
