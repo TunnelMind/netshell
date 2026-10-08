@@ -111,27 +111,6 @@ jobs:
             sudo rpm -i netshell-*.rpm
             ```
 
-            ### Linux package repos
-            ```bash
-            # Debian/Ubuntu
-            curl -fsSL https://packages.tunnelmind.ai/apt/gpg.key | sudo apt-key add -
-            echo "deb https://packages.tunnelmind.ai/apt stable main" | sudo tee /etc/apt/sources.list.d/netshell.list
-            sudo apt-get update && sudo apt-get install netshell
-
-            # Fedora/RHEL/Rocky
-            sudo curl -fsSL https://packages.tunnelmind.ai/rpm/netshell.repo -o /etc/yum.repos.d/netshell.repo
-            sudo dnf install netshell
-            ```
-
             ### macOS note
             Notarized builds pass Gatekeeper automatically. If Gatekeeper blocks the app
             on an unsigned build: right-click → Open → Open.
-
-      - name: Trigger package repo update
-        if: ${{ !contains(github.ref_name, '-') }}
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PACKAGES_REPO_TOKEN }}
-          repository: TunnelMind/netshell-packages
-          event-type: new-release
-          client-payload: '{"version": "${{ github.ref_name }}"}'
